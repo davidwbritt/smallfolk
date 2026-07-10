@@ -227,6 +227,12 @@
   .guide td{padding:5px 8px 5px 0;border-bottom:1px dotted var(--rule);vertical-align:top}
   .guide td:first-child{white-space:nowrap;font-family:var(--util);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;width:150px}
   .guide .redword{color:var(--red)}
+  .guide .greset{
+    background:none;border:none;padding:0;cursor:pointer;
+    font-family:var(--body);font-size:14px;color:var(--red);
+    text-decoration:underline;text-underline-offset:3px;
+  }
+  .guide .greset:hover{color:var(--ink)}
   @media (max-width:600px){ .guide .gpanel{padding:24px 18px} .guide td:first-child{width:110px} }
 
   /* session journal drawer (solo play) */
@@ -410,6 +416,9 @@
     <h3>Fine print, minus the fine</h3>
     <p>No AI, no accounts, no ads, no tracking — one open-source file that works offline.
     Villages you generate are <b>CC0</b>: use them in anything, including things you sell.</p>
+    <p>Everything Smallfolk remembers (your journals, this notice) lives only in this
+    browser. <button id="guide-reset" class="greset">Want a complete do-over? Forget it all.</button>
+    The villages themselves can't be lost — they live in their addresses.</p>
   </div>
 </div>
 
@@ -1183,6 +1192,21 @@ document.getElementById('btn-help').addEventListener('click', guideOpen);
 document.getElementById('guide-x').addEventListener('click', guideClose);
 guide.addEventListener('click', e => { if (e.target === guide) guideClose(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') guideClose(); });
+document.getElementById('guide-reset').addEventListener('click', () => {
+  if (!confirm('Forget every journal and setting Smallfolk has saved in this browser? The villages themselves are safe — they live in their addresses.')) return;
+  try {
+    const doomed = [];
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if (k && k.indexOf('sf:') === 0) doomed.push(k);
+    }
+    doomed.forEach(k => localStorage.removeItem(k));
+  } catch (e){}
+  J = [];
+  jRender();
+  guideClose();
+  toast('Forgotten. The survey begins again.');
+});
 /* first visit: a gentle nudge, once, never a popup */
 try {
   if (!localStorage.getItem('sf:seen')){
