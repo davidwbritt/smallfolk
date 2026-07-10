@@ -1031,14 +1031,15 @@ function generate(seed){
   /* ----- rumors: 3 from the trouble, 3 from real secrets, 2 color ----- */
   const rumors = woven.rumors.map(r => ({ ...r }));
   const others = shuffle(rng, V.npcs.filter(p => !cast.includes(p))).slice(0, 3);
-  others.forEach(p => {
+  const smokeTemplates = shuffle(rng, [
+    p => 'They say ' + p.name + ' isn’t sleeping. Lamp’s lit at all hours.',
+    p => p.name + ' has been to the market town three times this month. Three!',
+    p => 'Ask ' + p.name + ' what’s under the hearthstone, if you’re brave.',
+    p => p.name + ' paid in silver last week. Silver!'
+  ]);
+  others.forEach((p, oi) => {
     rumors.push({
-      text: pick(rng, [
-        'They say ' + p.name + ' isn’t sleeping. Lamp’s lit at all hours.',
-        p.name + ' has been to the market town three times this month. Three!',
-        'Ask ' + p.name + ' what’s under the hearthstone, if you’re brave.',
-        p.name + ' paid in silver last week. Silver!'
-      ]),
+      text: smokeTemplates[oi % smokeTemplates.length](p),
       true: true,
       gm: 'Smoke from a real fire — see ' + p.name.split(' ')[0] + '’s secret.'
     });
