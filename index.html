@@ -195,6 +195,40 @@
     font-family:var(--util);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   }
 
+  /* the guide overlay */
+  .guide{
+    position:fixed;inset:0;z-index:60;display:none;
+    background:rgba(29,26,20,.65);
+    align-items:flex-start;justify-content:center;
+    overflow-y:auto;padding:5vh 16px 40px;
+  }
+  .guide.open{display:flex}
+  .guide .gpanel{
+    background:var(--paper);color:var(--ink);max-width:720px;width:100%;
+    border:1.5px solid var(--ink);box-shadow:0 30px 60px -20px rgba(0,0,0,.7);
+    padding:34px 38px 30px;position:relative;
+  }
+  .guide .gx{
+    position:absolute;top:14px;right:16px;
+    background:none;border:1px solid var(--ink);border-radius:50%;
+    width:32px;height:32px;cursor:pointer;color:var(--ink);font-size:14px;
+  }
+  .guide .gx:hover{background:var(--ink);color:var(--paper)}
+  .guide h2{font-family:var(--display);font-weight:500;font-size:26px;margin-bottom:4px}
+  .guide .gsub{font-style:italic;color:var(--ink-soft);margin-bottom:18px}
+  .guide h3{
+    font-family:var(--util);font-weight:400;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--red);margin:22px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:4px;
+  }
+  .guide ol,.guide ul{margin-left:20px;font-size:14px}
+  .guide li{padding:3px 0;text-wrap:pretty}
+  .guide p{font-size:14px;margin-bottom:8px;text-wrap:pretty}
+  .guide table{width:100%;border-collapse:collapse;font-size:13px}
+  .guide td{padding:5px 8px 5px 0;border-bottom:1px dotted var(--rule);vertical-align:top}
+  .guide td:first-child{white-space:nowrap;font-family:var(--util);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;width:150px}
+  .guide .redword{color:var(--red)}
+  @media (max-width:600px){ .guide .gpanel{padding:24px 18px} .guide td:first-child{width:110px} }
+
   /* session journal drawer (solo play) */
   .journal{
     position:fixed;left:0;top:49px;bottom:0;z-index:26;width:330px;max-width:92vw;
@@ -308,6 +342,7 @@
   <button id="btn-view" aria-pressed="false">Player view</button>
   <button id="btn-md">Copy markdown</button>
   <button id="btn-journal" aria-pressed="false">Journal</button>
+  <button id="btn-help" aria-haspopup="dialog">? How it works</button>
   <button id="btn-print" title="Use “Save as PDF” in the print dialog to export. Player view prints a spoiler-free handout.">Print / PDF</button>
   <span class="spacer"></span>
   <a class="tb heart" id="btn-tip" href="#" target="_blank" rel="noopener">♥ Tip the innkeeper</a>
@@ -324,6 +359,59 @@
   <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
   <div><h3>Who keeps this?</h3>No AI, no accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
 </aside>
+
+<div class="guide" id="guide" role="dialog" aria-label="How Smallfolk works">
+  <div class="gpanel">
+    <button class="gx" id="guide-x" aria-label="Close guide">✕</button>
+    <h2>How Smallfolk works</h2>
+    <p class="gsub">The two-minute version, with no assumed knowledge.</p>
+
+    <p><b>The one-sentence version:</b> every click of <b>New village</b> invents a complete
+    little village — its people, their secrets, and one mystery — and <b>the web address IS
+    the village</b>: copy the URL, send it to a friend, and they see exactly the same place.</p>
+
+    <p><b>The one-rule version:</b> everything in <b>black ink</b> is public — read it aloud,
+    show it to anyone. Everything in <span class="redword"><b>red ink</b></span> is the
+    secret truth, meant for the person running the game. <b>Player view</b> (top bar)
+    hides all the red at once.</p>
+
+    <h3>If you're running a game tonight</h3>
+    <ol>
+      <li>Click <b>New village</b> (or the ‹ › arrows) until you find one you like.</li>
+      <li>Read the <span class="redword">red ink</span> — the secrets, the rumor answers, and “The Trouble” box at the bottom. That's the plot, pre-loaded.</li>
+      <li>Take it with you: <b>Print / PDF</b> for a handout, or <b>Copy markdown</b> to paste into your notes app.</li>
+      <li>At the table, when players ask around town: roll a d8 on the rumor table and read what they hear. You already know which rumors are lies.</li>
+      <li>Sharing your screen? Hit <b>Player view</b> first. The red disappears.</li>
+    </ol>
+
+    <h3>If you're playing solo</h3>
+    <ol>
+      <li>Turn <b>Player view</b> ON — so the mystery stays hidden from you too.</li>
+      <li>Open the <b>Journal</b> (top bar) and press <b>⚑ Begin</b>. It writes your arrival scene for you.</li>
+      <li>Play by asking yes/no questions out loud — “Does the innkeeper trust me?” — then click <b>likely?</b>, <b>even?</b>, or <b>unlikely?</b> in the dice tray. The oracle answers; you write what it means.</li>
+      <li>Meeting someone new? Click <b>reaction?</b>. Stuck or bored? Click <b>✶ Something happens</b> in the journal, or <b>✶ spark</b> in the tray.</li>
+      <li>Everything you roll logs itself into the journal while it's open. When the session ends, <b>Export</b> copies the whole story as text — post it, keep it, or burn it with <b>Clear</b>.</li>
+      <li>When you're ready to know the truth, switch off Player view and read the red.</li>
+    </ol>
+
+    <h3>Every control, in one line each</h3>
+    <table>
+      <tr><td>New village</td><td>Invent a fresh village with a new address.</td></tr>
+      <tr><td>‹ › arrows / ← →</td><td>Flip to the neighbouring “sheets of the survey” — village 42, 43, 44…</td></tr>
+      <tr><td>Player view</td><td>Hide / reveal all the red ink. Safe for screens and for solo play.</td></tr>
+      <tr><td>Copy markdown</td><td>The whole village as tidy text for your notes app.</td></tr>
+      <tr><td>Journal</td><td>Your session log: write entries, auto-log rolls, export as text.</td></tr>
+      <tr><td>Print / PDF</td><td>A clean 4-page handout. Choose “Save as PDF” in the dialog.</td></tr>
+      <tr><td>Dice tray</td><td>Bottom corner: d4–d100, plus the oracle, spark, and reaction rolls.</td></tr>
+      <tr><td>#daily</td><td>Add <b>#daily</b> to the address for the village of the day — same for everyone, new at midnight UTC.</td></tr>
+      <tr><td>♥ Tip</td><td>Free forever; the tip jar keeps the lights on. No pressure, innkeeper's honour.</td></tr>
+    </table>
+
+    <h3>Fine print, minus the fine</h3>
+    <p>No AI, no accounts, no ads, no tracking — one open-source file that works offline.
+    Villages you generate are <b>CC0</b>: use them in anything, including things you sell.</p>
+  </div>
+</div>
 
 <aside class="journal" id="journal" aria-label="Session journal">
   <h2><span>Session Journal · <span id="j-count">0</span></span>
@@ -1087,6 +1175,22 @@ document.getElementById('dice-head').addEventListener('click', () => {
   diceBox.classList.toggle('closed');
   document.getElementById('dice-carat').textContent = diceBox.classList.contains('closed') ? '▴' : '▾';
 });
+/* ================= the guide ================= */
+const guide = document.getElementById('guide');
+function guideOpen(){ guide.classList.add('open'); document.getElementById('guide-x').focus(); }
+function guideClose(){ guide.classList.remove('open'); }
+document.getElementById('btn-help').addEventListener('click', guideOpen);
+document.getElementById('guide-x').addEventListener('click', guideClose);
+guide.addEventListener('click', e => { if (e.target === guide) guideClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') guideClose(); });
+/* first visit: a gentle nudge, once, never a popup */
+try {
+  if (!localStorage.getItem('sf:seen')){
+    localStorage.setItem('sf:seen', '1');
+    setTimeout(() => toast('New here? Press “? How it works” for the two-minute tour'), 1200);
+  }
+} catch (e){}
+
 /* ================= session journal (solo play) ================= */
 let J = [];
 const jDrawer = document.getElementById('journal');
