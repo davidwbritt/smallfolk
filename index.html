@@ -8,6 +8,9 @@
 <meta property="og:title" content="Smallfolk — a whole village on one page">
 <meta property="og:description" content="Ten villagers, their secrets, their tavern, their Trouble. Seeded, shareable, printable. Free forever.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://davidwbritt.github.io/smallfolk/">
+<meta property="og:image" content="https://davidwbritt.github.io/smallfolk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --paper:#f7f4ec;
@@ -159,11 +162,74 @@
   footer.colophon a{color:var(--red);text-decoration:none}
   footer.colophon a:hover{text-decoration:underline}
 
+  /* page-turn arrows: the survey has neighbouring sheets */
+  .pager{
+    position:fixed;top:50%;transform:translateY(-50%);z-index:20;
+    width:46px;height:46px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--ink);color:var(--ink);
+    font-family:var(--body);font-size:22px;line-height:1;cursor:pointer;
+    box-shadow:0 8px 18px -8px rgba(30,25,15,.5);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pager:hover{background:var(--ink);color:var(--paper)}
+  .pager.prev{left:10px}
+  .pager.next{right:10px}
+  .pager small{
+    position:absolute;top:100%;margin-top:6px;
+    font-family:var(--util);font-size:8px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);white-space:nowrap;
+  }
+
+  .faqwrap{
+    max-width:880px;margin:26px auto 0;
+    font-size:13.5px;color:#4a4436;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px 28px;
+    padding:0 12px;
+  }
+  .faqwrap h3{font-family:var(--util);font-size:10px;letter-spacing:.22em;text-transform:uppercase;margin-bottom:4px;color:var(--ink)}
+  .faqwrap a{color:var(--red)}
+
   .toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:40;
     background:var(--ink);color:var(--paper);padding:10px 20px;border-radius:2px;
     font-family:var(--util);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   }
+
+  /* dice tray, bottom corner */
+  .dice{
+    position:fixed;right:14px;bottom:14px;z-index:25;
+    background:var(--paper);border:1.5px solid var(--ink);border-radius:3px;
+    box-shadow:0 10px 24px -10px rgba(30,25,15,.55);
+    font-family:var(--util);
+    width:190px;
+  }
+  .dice header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:7px 10px;cursor:pointer;
+    font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);
+    border-bottom:1px solid var(--rule);
+  }
+  .dice.closed header{border-bottom:none}
+  .dice .tray{padding:9px 10px 10px}
+  .dice.closed .tray{display:none}
+  .dice .dbtns{display:flex;flex-wrap:wrap;gap:5px}
+  .dice .dbtns button{
+    flex:1 0 26%;
+    background:none;border:1px solid var(--ink);border-radius:2px;color:var(--ink);
+    font-family:var(--util);font-size:10.5px;letter-spacing:.08em;
+    padding:5px 0;cursor:pointer;
+  }
+  .dice .dbtns button:hover{background:var(--ink);color:var(--paper)}
+  .dice .dres{
+    font-family:var(--display);font-size:30px;text-align:center;
+    padding:8px 0 2px;min-height:44px;color:var(--ink);
+  }
+  .dice .dres .crit{color:var(--red)}
+  .dice .dlog{
+    font-size:9.5px;letter-spacing:.1em;color:var(--ink-soft);
+    text-align:center;min-height:14px;text-transform:uppercase;
+  }
+  @media (max-width:760px){ .dice{width:160px} }
 
   @media (max-width:760px){
     .sheet{padding:28px 20px}
@@ -172,7 +238,7 @@
   }
   @media print{
     body{background:#fff;padding:0}
-    .toolbar,.toast{display:none !important}
+    .toolbar,.toast,.pager,.dice,.faqwrap{display:none !important}
     .sheet{border:none;box-shadow:none;max-width:none;padding:10px 6px}
     .person,.place,section{break-inside:avoid}
   }
@@ -188,7 +254,30 @@
   <span class="spacer"></span>
   <a class="tb heart" id="btn-tip" href="#" target="_blank" rel="noopener">♥ Tip the innkeeper</a>
 </nav>
+<button class="pager prev" id="pg-prev" aria-label="Previous village" title="Previous village (←)">‹<small>prev sheet</small></button>
+<button class="pager next" id="pg-next" aria-label="Next village" title="Next village (→)">›<small>next sheet</small></button>
+
 <main class="sheet" id="sheet" aria-live="polite"></main>
+
+<aside class="faqwrap" aria-label="About Smallfolk">
+  <div><h3>What is this?</h3>One click gives a GM a complete village: people, secrets, rumors, prices, and one good Trouble — cross-referenced, on one printable page. System-neutral.</div>
+  <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey.</div>
+  <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
+  <div><h3>Who keeps this?</h3>No AI, no accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
+</aside>
+
+<aside class="dice closed" id="dice" aria-label="Dice tray">
+  <header id="dice-head"><span>⚄ Dice tray</span><span id="dice-carat">▴</span></header>
+  <div class="tray">
+    <div class="dres" id="dice-res">—</div>
+    <div class="dlog" id="dice-log"></div>
+    <div class="dbtns">
+      <button data-d="4">d4</button><button data-d="6">d6</button><button data-d="8">d8</button>
+      <button data-d="10">d10</button><button data-d="12">d12</button><button data-d="20">d20</button>
+      <button data-d="100">d100</button><button data-d="6x2">2d6</button><button data-d="6x3">3d6</button>
+    </div>
+  </div>
+</aside>
 
 <script>
 'use strict';
@@ -539,6 +628,102 @@ const TROUBLES = [
         ]
       };
     }
+  },
+  {
+    title: 'The Toll Nobody Set',
+    symptom: 'A man in half a uniform collects a toll at the bridge, “by the lord’s writ.” The writ has a seal. Nobody can read it.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: 'The toll-man splits the take with ' + culprit.name + ', who invented the whole arrangement, forged writ and all, borrowing a seal-impression from an old letter. ' + cap(witness.name) + ' handled the writ, cannot read it either, but recognized the smell of the sealing-candle — the kind ' + culprit.name + ' buys. ' + cap(suspect.name) + ' waved the toll-man through free on the first day, out of simple confusion, and now looks to everyone like an accomplice.',
+        secrets: [[culprit, culprit.name + ' invented the bridge toll and forged the writ. Half the take is buried in a butter crock. It seemed clever for exactly nine days.'], [witness, witness.name + ' knows whose candle sealed that writ and is enjoying the suspense more than is decent.']],
+        rumors: [
+          { text: 'The lord’s raised a toll — next it’ll be the well, mark me.', true: false, gm: 'The lord knows nothing of it, which is the culprit’s whole problem.' },
+          { text: suspect.name + ' never pays at the bridge. Ask yourself why.', true: false, gm: 'Confusion, day one, nothing more.' },
+          { text: 'The toll-man sleeps at the charcoal burner’s hut, not the manor.', true: true, gm: 'A “lord’s man” who avoids the manor. Pull the thread.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'Two Graves Disturbed',
+    symptom: 'Two graves opened in the night and closed again, tidily. Nothing obvious taken. The sexton found boot prints and is not sleeping.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: culprit.name + ' buried letters with the dead years ago, thinking that the one archive nobody audits. Now someone in the market town is asking questions those letters could answer, so ' + culprit.he + ' went and got them back — reverently, by ' + culprit.his + ' own lights. ' + cap(witness.name) + ' saw the lantern from the privy and told no one, being unable to explain the hour. Suspicion runs instead to ' + suspect.name + ', on the strength of a spade and a reputation.',
+        secrets: [[culprit, culprit.name + ' opened the graves to retrieve ' + culprit.his + ' own letters, and reburied everything with more care than the funerals got. The letters are now under the floor, which is not better.']],
+        rumors: [
+          { text: 'Resurrection men. They start with old graves and finish with fresh ones.', true: false, gm: 'Nothing left with the diggers but worms.' },
+          { text: suspect.name + ' owns the only spade with a mended haft, and the prints show a mended haft.', true: false, gm: 'Half the parish mends hafts the same way.' },
+          { text: 'Whoever it was, they prayed after. The grass was knelt on.', true: true, gm: 'True, and it should narrow the list considerably.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'The Flour Makes Dreams',
+    symptom: 'Half the village is dreaming the same dream — a red field, a white bird — and the baker’s cat won’t come indoors.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: 'The rye sprouted a bad bloom in the wet, and ' + culprit.name + ' milled it anyway rather than admit a short harvest share — the dreams are in the bread. ' + cap(culprit.he) + ' has stopped eating it, which ' + culprit.he + ' does not think anyone has noticed. ' + cap(witness.name) + ' noticed. ' + cap(suspect.name) + ' has been interpreting the dreams at a copper a time and is one town meeting away from being blamed for causing them.',
+        secrets: [[culprit, culprit.name + ' milled the blighted rye knowingly. The dreams are ' + culprit.his + ' fault, and the next symptom the herbals list is worse than dreams.'], [suspect, suspect.name + ' does not believe a word of ' + suspect.his + ' own dream-readings, and the copper coins are going somewhere specific.']],
+        rumors: [
+          { text: 'The dream means war within the year. A red field! A white bird!', true: false, gm: 'It means alkaloids.' },
+          { text: 'Notice who isn’t eating bread lately.', true: true, gm: 'The whole case, in one sentence, spoken by someone who thinks it’s about reducing.' },
+          { text: suspect.name + ' knew the dream before folk told it. Explain that.', true: false, gm: 'Everyone tells the same dream; a listener learns it fast.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'A Stranger Asks for a Name',
+    symptom: 'A polite stranger has been at the inn three days, asking for someone called “Corvin Hale.” Nobody here has heard the name. The stranger pays well and does not leave.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: '“Corvin Hale” is ' + culprit.name + ', or was, twenty years and one bad debt ago. ' + cap(culprit.he) + ' has worn this village like a coat ever since, and the coat fits. ' + cap(witness.name) + ' matched the stranger’s description to an old story ' + culprit.name + ' once told drunk, and has said nothing yet — the silence has a price forming in it. Meanwhile ' + suspect.name + ' answered the stranger’s questions too helpfully, and the village has decided ' + suspect.he + ' knows something.',
+        secrets: [[culprit, culprit.name + ' was Corvin Hale. What the stranger wants may not even be cruel — but ' + culprit.he + ' cannot afford to find out, and is pricing passage east.'], [witness, witness.name + ' has connected the stranger’s question to ' + culprit.name + ' and is deciding what the connection is worth.']],
+        rumors: [
+          { text: 'The stranger’s a debt-taker. They always smile like that.', true: true, gm: 'Close enough — an heir-hunter, which is a debt-taker in better boots. The debt is an inheritance.' },
+          { text: suspect.name + ' and the stranger talked an hour by the ford. An hour!', true: false, gm: 'Directions, weather, and the suspect’s life story, unprompted.' },
+          { text: 'There was a Hale family here once, before the fire. Ask the oldest graves.', true: false, gm: 'There wasn’t. But the players will enjoy the graveyard by lantern-light.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'The Dogs Won’t Cross the Green',
+    symptom: 'Every dog in the village walks around the green, not across it. They started on the same morning. Nobody watched them agree.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: 'A pedlar died badly at the spring fair — his heart, in the crowd’s opinion, which was busy — and ' + culprit.name + ' buried him under the green by night rather than answer why the man had ' + culprit.his + ' name written inside his coat. The dogs know what dogs know. ' + cap(witness.name) + '’s terrier brought home a brass button and ' + witness.he + ' has put it on the mantel, unconnected, ticking. Children have decided ' + suspect.name + ' cursed the green, because ' + suspect.he + ' once shouted at a maypole.',
+        secrets: [[culprit, culprit.name + ' buried the pedlar under the green. The name in the coat is the older, harder secret — the pedlar was kin, and came looking.']],
+        rumors: [
+          { text: 'The green’s cursed. ' + suspect.name + ' was seen dancing on it widdershins.', true: false, gm: cap(suspect.he) + ' was chasing a hat.' },
+          { text: 'The pedlar from the fair never bought passage on from here. No cart took him.', true: true, gm: 'Because he never left.' },
+          { text: 'Dig at the green and the whole village’s luck is forfeit. Old law.', true: false, gm: 'Invented this week, by the culprit, at the tavern, casually. Twice.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'Someone Signed the Lord’s Name',
+    symptom: 'The conscription notice came, and then a second letter came excusing this village entirely. Rejoicing was general. The reeve has gone quiet.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: 'The second letter is forged. ' + cap(culprit.name) + ' wrote it to keep one particular person off the levy rolls, and did such honest work of the seal that it will hold until the lord’s clerk cross-files at quarter-day. ' + cap(witness.name) + ' has seen real writs and knows the ink is wrong; ' + witness.he + ' also has a son of age, and so says nothing, complicit by arithmetic. If it breaks, it breaks first on ' + suspect.name + ', the only villager known to write a fair hand.',
+        secrets: [[culprit, culprit.name + ' forged the lord’s letter. The person ' + culprit.he + ' did it for does not know, and would not thank ' + culprit.him + '.'], [witness, witness.name + ' knows the letter is false and has decided, for now, that everyone’s children matter equally. Quarter-day is coming.']],
+        rumors: [
+          { text: 'The lord excused us because of what this village did for his grandfather. He remembers!', true: false, gm: 'He does not know this village exists.' },
+          { text: suspect.name + ' writes a fair hand and has been buying good paper.', true: false, gm: 'The paper is for letters to someone in the market town. That is a different secret.' },
+          { text: 'The reeve hasn’t posted the excuse letter on the moot door, and won’t.', true: true, gm: 'Because anyone who compared seals side by side might see it. The reeve suspects.' }
+        ]
+      };
+    }
   }
 ];
 
@@ -793,6 +978,49 @@ document.getElementById('btn-md').addEventListener('click', () => {
 });
 document.getElementById('btn-print').addEventListener('click', () => window.print());
 document.getElementById('btn-tip').href = SUPPORT_URL;
+
+/* ----- the survey has neighbouring sheets ----- */
+function stepSeed(dir){
+  const m = V.seed.match(/^(.*?)(\d+)$/);
+  let base = 'sheet-', n = 1;
+  if (m){ base = m[1]; n = parseInt(m[2], 10); }
+  else base = V.seed + '-';
+  n += dir;
+  if (n < 1) n = 999;
+  if (n > 999) n = 1;
+  location.hash = base + n;
+}
+document.getElementById('pg-prev').addEventListener('click', () => stepSeed(-1));
+document.getElementById('pg-next').addEventListener('click', () => stepSeed(1));
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'ArrowLeft') stepSeed(-1);
+  if (e.key === 'ArrowRight') stepSeed(1);
+});
+
+/* ----- dice tray ----- */
+const diceBox = document.getElementById('dice');
+document.getElementById('dice-head').addEventListener('click', () => {
+  diceBox.classList.toggle('closed');
+  document.getElementById('dice-carat').textContent = diceBox.classList.contains('closed') ? '▴' : '▾';
+});
+document.querySelectorAll('.dice .dbtns button').forEach(b => {
+  b.addEventListener('click', () => {
+    const spec = b.getAttribute('data-d');
+    let sides, count = 1;
+    if (spec.includes('x')){ const p = spec.split('x'); sides = +p[0]; count = +p[1]; }
+    else sides = +spec;
+    const rolls = [];
+    for (let i = 0; i < count; i++) rolls.push(1 + Math.floor(Math.random() * sides));
+    const total = rolls.reduce((a, x) => a + x, 0);
+    const res = document.getElementById('dice-res');
+    const crit = count === 1 && (total === sides || total === 1);
+    res.innerHTML = crit ? '<span class="crit">' + total + '</span>' : String(total);
+    document.getElementById('dice-log').textContent =
+      (count > 1 ? count + 'd' + sides + ': ' + rolls.join(' + ') : 'd' + sides) +
+      (crit ? (total === 1 ? ' · oh no' : ' · oh yes') : '');
+  });
+});
 
 /* ================= boot ================= */
 function boot(){

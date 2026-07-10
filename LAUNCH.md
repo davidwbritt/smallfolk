@@ -20,17 +20,22 @@ the community is loudly tired of both.
 
 ## Phase A — Foundation (Dave, ~1 hour)
 
-- [ ] Create GitHub repo, push, enable Pages (commands in README.md)
+- [x] GitHub repo + Pages live — **davidwbritt.github.io/smallfolk**
 - [x] Create Ko-fi account — **ko-fi.com/clevermonkey**, wired into index.html
-- [ ] Create itch.io account (publisher page)
+- [x] itch.io account created — page upload pending (recipe: itch-assets/itch-page-copy.md)
 - [ ] Sanity-pass 5–10 villages; note any text that reads wrong (Claude fixes)
 
-## Phase B — Pre-launch polish (Claude, 1–2 sessions)
+## Phase B — Pre-launch polish (Claude)
 
-- [ ] 6 more Trouble templates (12 total) — biggest replay-value lever
-- [ ] OG share image + favicon so links unfurl well
-- [ ] itch.io page copy + screenshots (Claude drafts, Dave uploads)
-- [ ] A "what is this" one-liner + FAQ section at page bottom for cold visitors
+- [x] 12 Trouble templates (verified even distribution across 600 seeds)
+- [x] OG share image + meta (og-image.png, absolute URLs)
+- [x] itch.io page copy + screenshots (itch-assets/)
+- [x] FAQ section at page bottom for cold visitors
+- [x] Bonus features: ‹ › sheet-paging arrows (+ ←/→ keys), corner dice tray
+
+**Note on seed stability:** content updates (new Troubles, new banks) change what
+existing seeds generate. Fine pre-launch; after launch, batch content drops and
+mention "the survey has been revised" in release notes.
 
 ## Phase C — Launch week (Dave posts, Claude drafts everything)
 
