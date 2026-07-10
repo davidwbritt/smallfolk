@@ -174,6 +174,7 @@
   .pager:hover{background:var(--ink);color:var(--paper)}
   .pager.prev{left:10px}
   .pager.next{right:10px}
+  body.shire-mode .pager{display:none}
   .pager small{
     position:absolute;top:100%;margin-top:6px;
     font-family:var(--util);font-size:8px;letter-spacing:.16em;text-transform:uppercase;
@@ -409,6 +410,7 @@
       <tr><td>Journal</td><td>Your session log: write entries, auto-log rolls, export as text.</td></tr>
       <tr><td>Print / PDF</td><td>A clean 4-page handout. Choose “Save as PDF” in the dialog.</td></tr>
       <tr><td>Dice tray</td><td>Bottom corner: d4–d100, plus the oracle, spark, and reaction rolls.</td></tr>
+      <tr><td>The shire map</td><td>Every village belongs to a hundred. The link under its map shows the neighbours, the market town, the local feud — all clickable, all real.</td></tr>
       <tr><td>#daily</td><td>Add <b>#daily</b> to the address for the village of the day — same for everyone, new at midnight UTC.</td></tr>
       <tr><td>♥ Tip</td><td>Free forever; the tip jar keeps the lights on. No pressure, innkeeper's honour.</td></tr>
     </table>
@@ -661,6 +663,63 @@ function mapSVG(rng, V){
     '<path d="M120 196 h50" ' + thin + '/><path d="M120 193 v6 M170 193 v6" ' + thin + '/>' +
     '<text x="145" y="190" text-anchor="middle" font-family="Optima,Candara,sans-serif" font-size="7" letter-spacing="1" fill="' + INK + '">ONE FURLONG</text>';
   return '<svg viewBox="0 0 320 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of the village">' + s + '</svg>';
+}
+
+/* ================= the shire map ================= */
+function shireMapSVG(rng, S){
+  const thin = 'fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round"';
+  let s = '';
+  /* roads: chain the villages west to east */
+  const byX = S.members.slice().sort((a, b) => a.x - b.x);
+  for (let i = 0; i + 1 < byX.length; i++){
+    const a = byX[i], b = byX[i + 1];
+    const mx = (a.x + b.x) / 2 + rint(rng, -18, 18), my = (a.y + b.y) / 2 + rint(rng, -14, 14);
+    s += '<path d="M' + a.x + ' ' + a.y + ' Q' + mx + ' ' + my + ' ' + b.x + ' ' + b.y + '" fill="none" stroke="' + INK + '" stroke-width="1.6" stroke-dasharray="6 4" opacity=".75"/>';
+  }
+  /* a river wandering through */
+  if (S.hasRiver){
+    let rx = rint(rng, 140, 620), ry = 8;
+    let river = 'M' + rx + ' ' + ry + ' ';
+    while (ry < 400){
+      ry += rint(rng, 40, 70); rx += rint(rng, -60, 60);
+      river += 'L' + Math.max(30, Math.min(770, rx)) + ' ' + ry + ' ';
+    }
+    s += '<path d="' + river + '" fill="none" stroke="' + INK + '" stroke-width="1.2" opacity=".7"/>';
+  }
+  /* hills in the corners */
+  for (let i = 0; i < rint(rng, 5, 8); i++){
+    const hx = chance(rng, 0.5) ? rint(rng, 20, 130) : rint(rng, 660, 780);
+    const hy = rint(rng, 20, 110);
+    s += '<path d="M' + (hx - 12) + ' ' + hy + ' Q' + hx + ' ' + (hy - 14) + ' ' + (hx + 12) + ' ' + hy + '" ' + thin + '/>';
+  }
+  /* the feud: crossed knives on the road between them */
+  if (S.feud){
+    const a = S.members[S.feud[0]], b = S.members[S.feud[1]];
+    const fx = (a.x + b.x) / 2, fy = (a.y + b.y) / 2;
+    s += '<path d="M' + (fx - 7) + ' ' + (fy - 7) + ' l14 14 M' + (fx + 7) + ' ' + (fy - 7) + ' l-14 14" stroke="#a02c20" stroke-width="1.6" fill="none"/>';
+  }
+  /* villages */
+  S.members.forEach((m, i) => {
+    const isMarket = i === S.market, isShrine = i === S.shrine;
+    s += '<a href="#' + m.seed + '">' +
+      '<g style="cursor:pointer">' +
+      '<circle cx="' + m.x + '" cy="' + m.y + '" r="16" fill="#f7f4ec" opacity=".01"/>' +
+      (isMarket
+        ? '<rect x="' + (m.x - 6) + '" y="' + (m.y - 6) + '" width="12" height="12" fill="' + INK + '" transform="rotate(45 ' + m.x + ' ' + m.y + ')"/><circle cx="' + m.x + '" cy="' + m.y + '" r="11" ' + thin + '/>'
+        : '<rect x="' + (m.x - 4.5) + '" y="' + (m.y - 4.5) + '" width="9" height="9" fill="' + INK + '" transform="rotate(45 ' + m.x + ' ' + m.y + ')"/>') +
+      (isShrine ? '<path d="M' + (m.x + 11) + ' ' + (m.y - 15) + ' v10 M' + (m.x + 7) + ' ' + (m.y - 11.5) + ' h8" stroke="' + INK + '" stroke-width="1.4"/>' : '') +
+      '<text x="' + m.x + '" y="' + (m.y - (isShrine ? 20 : 13)) + '" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="13.5" fill="' + INK + '">' + m.name + '</text>' +
+      '<text x="' + m.x + '" y="' + (m.y + 21) + '" text-anchor="middle" font-family="Optima,Candara,sans-serif" font-size="8.5" letter-spacing="1" fill="' + INK + '" opacity=".75">No. ' + m.n + '</text>' +
+      '</g></a>';
+  });
+  /* cartouche + compass */
+  s += '<g font-family="Optima,Candara,\'Gill Sans\',sans-serif" fill="' + INK + '">' +
+    '<rect x="560" y="384" width="228" height="46" fill="none" stroke="' + INK + '" stroke-width=".8"/>' +
+    '<text x="674" y="403" text-anchor="middle" font-size="11" letter-spacing="2">' + S.name.toUpperCase() + '</text>' +
+    '<text x="674" y="419" text-anchor="middle" font-size="8" letter-spacing="1.5" font-style="italic">◆ MARKET · ✝ SHRINE · SURVEYED IN HASTE</text></g>' +
+    '<g ' + thin + '><circle cx="46" cy="398" r="14"/><line x1="46" y1="409" x2="46" y2="387"/><path d="M46 383 l-4 8 h8 z" fill="' + INK + '"/></g>' +
+    '<text x="46" y="378" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="' + INK + '">N</text>';
+  return '<svg viewBox="0 0 800 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of ' + S.name + '">' + s + '</svg>';
 }
 
 /* ================= the engine ================= */
@@ -1025,6 +1084,82 @@ function generate(seed){
 
 /* ================= rendering ================= */
 let V = null;
+let SHIRE = null;   /* base string when viewing a shire map */
+
+/* ================= the shire ================= */
+function seedParts(seed){
+  const m = seed.match(/^(.*?)(\d+)$/);
+  return m ? { base: m[1], n: parseInt(m[2], 10) } : { base: seed + '-', n: null };
+}
+const GOODS = ['wool', 'barley', 'iron nails', 'salt fish', 'oak timber', 'cheeses', 'hides', 'honey', 'good clay', 'geese'];
+const SHIRE_PATTERNS = [
+  w => 'the ' + w + ' Hundred',
+  w => 'the Vale of ' + w,
+  w => 'the ' + w + ' Country',
+  w => 'the Hundred of ' + w
+];
+function buildShire(base){
+  const rng = makeRng('shire:' + base);
+  const word = cap(base.replace(/-+$/, '').split(/[-_]+/).join('').toLowerCase());
+  const S = { base, name: pick(rng, SHIRE_PATTERNS)(word), hasRiver: chance(rng, 0.6), members: [] };
+  const N = rint(rng, 7, 9);
+  const spots = [];
+  for (let n = 1; n <= N; n++){
+    let x, y, guard = 0;
+    do {
+      x = rint(rng, 70, 730); y = rint(rng, 80, 340);
+    } while (guard++ < 60 && spots.some(p => (p[0] - x) ** 2 + (p[1] - y) ** 2 < 110 * 110));
+    spots.push([x, y]);
+    const seed = base + n;
+    const v = generate(seed);
+    S.members.push({ n, seed, x, y, name: v.name, pop: v.pop, deity: v.shrine.deity.name, symptom: v.trouble.symptom, goods: null });
+  }
+  const goodsShuffled = shuffle(rng, GOODS);
+  S.members.forEach((m, i) => { m.goods = goodsShuffled[i % goodsShuffled.length]; });
+  S.market = S.members.reduce((bi, m, i, arr) => m.pop > arr[bi].pop ? i : bi, 0);
+  S.shrine = (S.market + rint(rng, 1, N - 1)) % N;
+  const fa = rint(rng, 0, N - 1);
+  let fb = (fa + rint(rng, 1, N - 1)) % N;
+  S.feud = [fa, fb];
+  let wa = 0, wb = 0, guard = 0;
+  do { wa = rint(rng, 0, N - 1); wb = rint(rng, 0, N - 1); } while ((wa === wb || (wa === fa && wb === fb) || (wa === fb && wb === fa)) && guard++ < 30);
+  S.wedding = [wa, wb];
+  S.feudReason = pick(rng, ['a drowned bridge and who paid for it', 'the moving of a boundary stone, sixty years ago, allegedly', 'a church-ale that ended in a hayrick fire', 'which of them the old king actually slept in', 'a bell both claim was theirs first']);
+  return S;
+}
+
+function renderShire(base){
+  const S = buildShire(base);
+  const mk = i => '<a href="#' + S.members[i].seed + '">' + esc(S.members[i].name) + '</a>';
+  let h = '';
+  h += '<header class="masthead">' +
+    '<div class="over">Regional survey · ' + S.members.length + ' villages · one road</div>' +
+    '<h1>' + esc(cap(S.name)) + '</h1>' +
+    '<div class="sub">Every village on this map is real — click one, or share its address. They will say unkind things about each other; believe roughly half.</div>' +
+    '</header>';
+  h += '<section><div class="mapbox" style="border:1px solid var(--rule);background:#fbf9f3;padding:8px">' + shireMapSVG(makeRng('shiremap:' + base), S) + '</div></section>';
+  /* the villages */
+  h += '<section><h2 class="sec">The Villages <span class="n">population · goods · what they’re dealing with</span></h2><ol class="rumors">' +
+    S.members.map((m, i) =>
+      '<li><span><a href="#' + m.seed + '" style="color:var(--ink);font-weight:700;text-decoration:none">' + esc(m.name) + '</a>' +
+      (i === S.market ? ' <b style="font-family:var(--util);font-size:9px;letter-spacing:.15em">◆ MARKET</b>' : '') +
+      (i === S.shrine ? ' <b style="font-family:var(--util);font-size:9px;letter-spacing:.15em">✝ SHRINE</b>' : '') +
+      ' — ' + m.pop + ' souls, known for ' + esc(m.goods) + '. <span class="who">Talk there: “' + esc(m.symptom) + '”</span></span>' +
+      '<span class="tf" style="margin-left:auto;padding-left:10px;font-family:var(--util);font-size:9.5px;letter-spacing:.14em;white-space:nowrap;color:var(--ink-soft)">No. ' + m.n + '</span></li>'
+    ).join('') + '</ol></section>';
+  /* the ties */
+  h += '<section><h2 class="sec">The Ties Between Them</h2><div style="font-size:14px;max-width:620px">' +
+    '<p>On market day everything walks to ' + mk(S.market) + ': ' +
+    S.members.filter((m, i) => i !== S.market).slice(0, 3).map(m => m.goods + ' from ' + m.name).join(', ') + ', and gossip from everywhere.</p>' +
+    '<p style="margin-top:8px">Pilgrims cross the hundred to the shrine of ' + esc(S.members[S.shrine].deity) + ' at ' + mk(S.shrine) + '; the inns along the way price accordingly.</p>' +
+    '<p style="margin-top:8px"><span class="gm">✎ </span>' + mk(S.feud[0]) + ' and ' + mk(S.feud[1]) + ' have not shared a church-ale in a generation, over ' + esc(S.feudReason) + '. Meanwhile a wedding is being arranged between ' + mk(S.wedding[0]) + ' and ' + mk(S.wedding[1]) + ' — both sides call it love, and also it settles a debt.</p>' +
+    '</div></section>';
+  h += '<footer class="colophon"><span>' + esc(cap(S.name)) + ' · shires are seeded too — this one is “shire:' + esc(base.replace(/-+$/, '')) + '”</span>' +
+    '<span>no AI · no accounts · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
+  document.getElementById('sheet').innerHTML = h;
+  document.title = cap(S.name) + ' — Smallfolk';
+  return S;
+}
 
 function personCard(p, rng){
   return '<div class="person">' + portraitSVG(rng, p.sex, p.age) +
@@ -1057,7 +1192,17 @@ function render(){
     '<li><b>2.</b> The smithy</li>' +
     '<li><b>3.</b> Shrine of ' + esc(sh.deity.name) + '</li>' +
     '<li><b>4.</b> The moot hall</li>' +
-    '</ol><p style="margin-top:8px;font-style:italic;color:var(--ink-soft)">The rest is cottages, mud, and opinion.' + (V.hasRiver ? ' The river is called the river.' : '') + '</p></div></section>';
+    '</ol><p style="margin-top:8px;font-style:italic;color:var(--ink-soft)">The rest is cottages, mud, and opinion.' + (V.hasRiver ? ' The river is called the river.' : '') + '</p>' +
+    (function(){
+      const sp = seedParts(V.seed);
+      const n = sp.n === null ? 1 : sp.n;
+      const prevSeed = sp.base + (n - 1 < 1 ? 999 : n - 1);
+      const nextSeed = sp.base + (n + 1 > 999 ? 1 : n + 1);
+      const shireHash = 'shire:' + sp.base.replace(/-+$/, '');
+      return '<p style="margin-top:10px;font-size:12.5px">The road runs on: <a href="#' + esc(prevSeed) + '" style="color:var(--ink)">‹ ' + esc(generate(prevSeed).name) + '</a> · <a href="#' + esc(nextSeed) + '" style="color:var(--ink)">' + esc(generate(nextSeed).name) + ' ›</a><br>' +
+        'One village of <a href="#' + esc(shireHash) + '" style="color:var(--red)">' + esc(buildShire(sp.base).name) + ' — see the shire map</a>.</p>';
+    })() +
+    '</div></section>';
 
   /* people */
   h += '<section><h2 class="sec">The People <span class="n">appearance · manner · wants · and in red, what the GM knows</span></h2>' +
@@ -1145,6 +1290,7 @@ document.getElementById('btn-view').addEventListener('click', function(){
   toast(on ? 'Secrets hidden — safe to share the screen' : 'The red pen returns');
 });
 document.getElementById('btn-md').addEventListener('click', () => {
+  if (SHIRE){ toast('Open a village to copy it — the shire is just the map between them'); return; }
   const md = markdown();
   if (navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(md).then(() => toast('Copied — paste into your notes'), () => toast('Copy blocked — check permissions'));
@@ -1161,6 +1307,7 @@ document.getElementById('btn-tip').href = SUPPORT_URL;
 
 /* ----- the survey has neighbouring sheets ----- */
 function stepSeed(dir){
+  if (SHIRE || !V) return;
   const m = V.seed.match(/^(.*?)(\d+)$/);
   let base = 'sheet-', n = 1;
   if (m){ base = m[1]; n = parseInt(m[2], 10); }
@@ -1241,6 +1388,7 @@ function jRender(){
   box.scrollTop = box.scrollHeight;
 }
 function jAdd(kind, text){
+  if (!V){ toast('Open a village first — the journal follows you there'); return; }
   if (!text) return;
   J.push({ k: kind, t: text });
   jSave(); jRender();
@@ -1257,6 +1405,7 @@ document.getElementById('j-add').addEventListener('click', () => {
   ta.value = '';
 });
 document.getElementById('j-begin').addEventListener('click', () => {
+  if (!V){ toast('Open a village first — the journal follows you there'); return; }
   const t = V.tavern;
   const patron = t.patrons[0] ? t.patrons[0].p.name.split(' ')[0] : 'someone';
   jAdd('note', pick(makeRngLive(), [
@@ -1267,6 +1416,7 @@ document.getElementById('j-begin').addEventListener('click', () => {
 });
 function makeRngLive(){ return () => Math.random(); }
 document.getElementById('j-twist').addEventListener('click', () => {
+  if (!V){ toast('Open a village first — the journal follows you there'); return; }
   const p = pick(makeRngLive(), V.npcs);
   const q = pick(makeRngLive(), V.npcs.filter(o => o !== p));
   jAdd('note', '✶ ' + pick(makeRngLive(), [
@@ -1369,6 +1519,17 @@ function boot(){
     seed = randomSeed();
     history.replaceState(null, '', '#' + seed);
   }
+  if (seed.indexOf('shire:') === 0){
+    let base = seed.slice(6);
+    if (!/[-_]$/.test(base)) base += '-';
+    V = null; SHIRE = base;
+    document.body.classList.add('shire-mode');
+    renderShire(base);
+    window.scrollTo({ top: 0 });
+    return;
+  }
+  SHIRE = null;
+  document.body.classList.remove('shire-mode');
   V = generate(seed);
   render();
   jLoad();
