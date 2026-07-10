@@ -195,6 +195,48 @@
     font-family:var(--util);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   }
 
+  /* session journal drawer (solo play) */
+  .journal{
+    position:fixed;left:0;top:49px;bottom:0;z-index:26;width:330px;max-width:92vw;
+    background:var(--paper);border-right:1.5px solid var(--ink);
+    box-shadow:14px 0 30px -18px rgba(30,25,15,.5);
+    display:flex;flex-direction:column;
+    transform:translateX(-102%);transition:transform .25s;
+  }
+  .journal.open{transform:none}
+  .journal h2{
+    font-family:var(--util);font-weight:400;font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+    padding:12px 16px;border-bottom:1px solid var(--rule);color:var(--ink);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .journal h2 .jtools{display:flex;gap:8px}
+  .journal h2 button{
+    background:none;border:none;cursor:pointer;color:var(--red);
+    font-family:var(--util);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    text-decoration:underline;text-underline-offset:2px;padding:0;
+  }
+  .jentries{flex:1;overflow-y:auto;padding:10px 16px;font-size:13px}
+  .jentries .je{padding:7px 0;border-bottom:1px dotted var(--rule);text-wrap:pretty}
+  .jentries .je .jn{
+    font-family:var(--util);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--red);display:block;
+  }
+  .jentries .je.roll{color:var(--ink-soft);font-size:12px;font-style:italic}
+  .jentries .empty{font-style:italic;color:var(--ink-soft);padding:14px 2px}
+  .jcompose{border-top:1px solid var(--rule);padding:10px 12px}
+  .jcompose textarea{
+    width:100%;min-height:58px;resize:vertical;
+    font-family:var(--body);font-size:13px;color:var(--ink);
+    background:#fbf9f3;border:1px solid var(--rule);border-radius:2px;padding:7px 9px;
+  }
+  .jcompose .jbtns{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+  .jcompose .jbtns button{
+    background:none;border:1px solid var(--ink);border-radius:2px;color:var(--ink);
+    font-family:var(--util);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    padding:6px 10px;cursor:pointer;flex:1;
+  }
+  .jcompose .jbtns button:hover{background:var(--ink);color:var(--paper)}
+
   /* dice tray, bottom corner */
   .dice{
     position:fixed;right:14px;bottom:14px;z-index:25;
@@ -243,7 +285,7 @@
   @page{ margin:11mm 12mm }
   @media print{
     body{background:#fff;padding:0;font-size:12.5px}
-    .toolbar,.toast,.pager,.dice,.faqwrap{display:none !important}
+    .toolbar,.toast,.pager,.dice,.faqwrap,.journal{display:none !important}
     .sheet{border:none;box-shadow:none;max-width:none;padding:2px 0}
     .sheet, .gm, .gm-block, .person svg{
       -webkit-print-color-adjust:exact;
@@ -265,6 +307,7 @@
   <button id="btn-new">New village</button>
   <button id="btn-view" aria-pressed="false">Player view</button>
   <button id="btn-md">Copy markdown</button>
+  <button id="btn-journal" aria-pressed="false">Journal</button>
   <button id="btn-print" title="Use “Save as PDF” in the print dialog to export. Player view prints a spoiler-free handout.">Print / PDF</button>
   <span class="spacer"></span>
   <a class="tb heart" id="btn-tip" href="#" target="_blank" rel="noopener">♥ Tip the innkeeper</a>
@@ -277,8 +320,24 @@
 <aside class="faqwrap" aria-label="About Smallfolk">
   <div><h3>What is this?</h3>One click gives a GM a complete village: people, secrets, rumors, prices, and one good Trouble — cross-referenced, on one printable page. System-neutral.</div>
   <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey. Link <a href="#daily">#daily</a> for the village of the day — same for everyone, new at midnight UTC.</div>
+  <div><h3>Playing solo?</h3>Toggle <b>Player view</b> so the mystery stays hidden from yourself, open the <b>Journal</b>, press <b>⚑ Begin</b>, and let the oracle in the dice tray answer your questions. Your journal saves per village and exports as Markdown.</div>
   <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
   <div><h3>Who keeps this?</h3>No AI, no accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
+</aside>
+
+<aside class="journal" id="journal" aria-label="Session journal">
+  <h2><span>Session Journal · <span id="j-count">0</span></span>
+    <span class="jtools"><button id="j-export">Export</button><button id="j-clear">Clear</button></span>
+  </h2>
+  <div class="jentries" id="j-entries"></div>
+  <div class="jcompose">
+    <textarea id="j-text" placeholder="What happened? Write it as it happened…" aria-label="Journal entry"></textarea>
+    <div class="jbtns">
+      <button id="j-add">Write it down</button>
+      <button id="j-begin" title="An arrival vignette to start a session">⚑ Begin</button>
+      <button id="j-twist" title="A village-aware complication">✶ Something happens</button>
+    </div>
+  </div>
 </aside>
 
 <aside class="dice closed" id="dice" aria-label="Dice tray">
@@ -294,7 +353,7 @@
     <div class="olabel">Oracle — ask aloud, then:</div>
     <div class="dbtns">
       <button data-o="likely">likely?</button><button data-o="even">even?</button><button data-o="unlikely">unlikely?</button>
-      <button data-o="spark" style="flex-basis:100%">✶ spark</button>
+      <button data-o="spark">✶ spark</button><button data-o="react">reaction?</button>
     </div>
   </div>
 </aside>
@@ -1028,6 +1087,91 @@ document.getElementById('dice-head').addEventListener('click', () => {
   diceBox.classList.toggle('closed');
   document.getElementById('dice-carat').textContent = diceBox.classList.contains('closed') ? '▴' : '▾';
 });
+/* ================= session journal (solo play) ================= */
+let J = [];
+const jDrawer = document.getElementById('journal');
+function jKey(){ return 'sf:journal:' + V.seed; }
+function jLoad(){
+  try { J = JSON.parse(localStorage.getItem(jKey()) || '[]'); } catch (e){ J = []; }
+  jRender();
+}
+function jSave(){
+  try { localStorage.setItem(jKey(), JSON.stringify(J)); } catch (e){}
+}
+function jRender(){
+  const box = document.getElementById('j-entries');
+  document.getElementById('j-count').textContent = J.length;
+  if (!J.length){
+    box.innerHTML = '<div class="empty">An empty book. Press ⚑ Begin, or just start writing — the dice and oracle will log themselves here while the journal is open.</div>';
+    return;
+  }
+  box.innerHTML = J.map((e, i) =>
+    '<div class="je' + (e.k === 'roll' ? ' roll' : '') + '">' +
+    (e.k === 'roll' ? '' : '<span class="jn">Entry ' + (J.filter((x, xi) => x.k !== 'roll' && xi <= i).length) + '</span>') +
+    esc(e.t) + '</div>'
+  ).join('');
+  box.scrollTop = box.scrollHeight;
+}
+function jAdd(kind, text){
+  if (!text) return;
+  J.push({ k: kind, t: text });
+  jSave(); jRender();
+}
+document.getElementById('btn-journal').addEventListener('click', function(){
+  const open = jDrawer.classList.toggle('open');
+  this.setAttribute('aria-pressed', open ? 'true' : 'false');
+});
+document.getElementById('j-add').addEventListener('click', () => {
+  const ta = document.getElementById('j-text');
+  const t = ta.value.trim();
+  if (!t) return;
+  jAdd('note', t);
+  ta.value = '';
+});
+document.getElementById('j-begin').addEventListener('click', () => {
+  const t = V.tavern;
+  const patron = t.patrons[0] ? t.patrons[0].p.name.split(' ')[0] : 'someone';
+  jAdd('note', pick(makeRngLive(), [
+    'You reach ' + V.name + ' as the light goes. ' + t.name + ' is loud for the hour, and ' + patron + ' stops talking when the door opens. Word in the road-dust: “' + V.trouble.symptom + '”',
+    'Rain walks you into ' + V.name + '. The fire at ' + t.name + ' is good, the welcome is arithmetic. Before your boots dry you have heard it twice: “' + V.trouble.symptom + '”',
+    'You come to ' + V.name + ' by the ' + (V.hasRiver ? 'river path' : 'old road') + ', and the village notices. At ' + t.name + ', ' + t.keeper.name.split(' ')[0] + ' asks your business before your name. Behind the question: “' + V.trouble.symptom + '”'
+  ]));
+});
+function makeRngLive(){ return () => Math.random(); }
+document.getElementById('j-twist').addEventListener('click', () => {
+  const p = pick(makeRngLive(), V.npcs);
+  const q = pick(makeRngLive(), V.npcs.filter(o => o !== p));
+  jAdd('note', '✶ ' + pick(makeRngLive(), [
+    p.name + ' is seen doing something that does not fit ' + p.his + ' story.',
+    'A door that is always open is barred today: ask ' + p.name + '.',
+    p.name + ' and ' + q.name + ' break off talking when you come near.',
+    'Someone has been through your things. Nothing taken — something left.',
+    p.name + ' asks for your help with something small, urgent, and oddly specific.',
+    'The talk of “' + V.trouble.symptom + '” gets worse: it happened again last night.',
+    'A child hands you something they found and runs. It belongs to ' + p.name + '.',
+    q.name + ' offers you coin to stop asking questions. Too much coin.',
+    'The weather turns hard; the ' + (V.hasRiver ? 'ford is impassable' : 'road is mud to the axle') + '. Nobody leaves today.',
+    p.name + ' was not at home last night, whatever ' + p.he + ' says at breakfast.'
+  ]));
+});
+document.getElementById('j-export').addEventListener('click', () => {
+  const notes = J.filter(e => e.k !== 'roll');
+  const md = '# Journal — ' + V.name + ' (seed “' + V.seed + '”)\n\n' +
+    J.map(e => e.k === 'roll' ? '> 🎲 ' + e.t : '**·** ' + e.t).join('\n\n') +
+    '\n\n---\n*' + notes.length + ' entries. Played with Smallfolk — a whole village on one page.*';
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(md).then(() => toast('Journal copied as markdown'), () => toast('Copy blocked — check permissions'));
+  } else toast('Clipboard unavailable in this browser');
+});
+document.getElementById('j-clear').addEventListener('click', () => {
+  if (!confirm('Burn this journal? The village keeps no copy.')) return;
+  J = []; jSave(); jRender();
+});
+/* rolls log themselves while the journal is open */
+function jLogRoll(text){
+  if (jDrawer.classList.contains('open')) jAdd('roll', text);
+}
+
 /* Mythic-style oracle: ask a yes/no question, pick the odds */
 const ORACLE = {
   likely:   ['No, but…', 'Yes, but…', 'Yes', 'Yes', 'Yes', 'Yes, and…'],
@@ -1042,14 +1186,28 @@ document.querySelectorAll('.dice .dbtns button[data-o]').forEach(b => {
     const res = document.getElementById('dice-res');
     const log = document.getElementById('dice-log');
     if (kind === 'spark'){
-      res.innerHTML = '<span style="font-size:19px">' + SPARK_V[Math.floor(Math.random() * SPARK_V.length)] + ' the ' + SPARK_N[Math.floor(Math.random() * SPARK_N.length)] + '</span>';
+      const sp = SPARK_V[Math.floor(Math.random() * SPARK_V.length)] + ' the ' + SPARK_N[Math.floor(Math.random() * SPARK_N.length)];
+      res.innerHTML = '<span style="font-size:19px">' + sp + '</span>';
       log.textContent = 'spark · interpret freely';
+      jLogRoll('spark: ' + sp);
+      return;
+    }
+    if (kind === 'react'){
+      const REACT = ['hostile — hands near weapons', 'unfriendly — wants you gone', 'wary — answers cost extra', 'neutral — busy, mostly', 'curious — asks more than answers', 'friendly — pulls out a chair', 'helpful — and will remember helping'];
+      const two = 2 + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6);
+      const idx = Math.max(0, Math.min(6, Math.floor((two - 2) * 7 / 11)));
+      const line = REACT[idx];
+      res.innerHTML = '<span style="font-size:15px">' + line + '</span>';
+      log.textContent = 'reaction · 2d6 = ' + two;
+      jLogRoll('reaction (2d6=' + two + '): ' + line);
       return;
     }
     const roll = Math.floor(Math.random() * 6);
     const ans = ORACLE[kind][roll];
     res.innerHTML = '<span style="font-size:22px">' + ans + '</span>';
-    log.textContent = 'oracle · ' + kind + (Math.random() < 0.08 ? ' · and something changes…' : '');
+    const changed = Math.random() < 0.08;
+    log.textContent = 'oracle · ' + kind + (changed ? ' · and something changes…' : '');
+    jLogRoll('oracle (' + kind + '): ' + ans + (changed ? ' — and something changes…' : ''));
   });
 });
 document.querySelectorAll('.dice .dbtns button[data-d]').forEach(b => {
@@ -1067,6 +1225,7 @@ document.querySelectorAll('.dice .dbtns button[data-d]').forEach(b => {
     document.getElementById('dice-log').textContent =
       (count > 1 ? count + 'd' + sides + ': ' + rolls.join(' + ') : 'd' + sides) +
       (crit ? (total === 1 ? ' · oh no' : ' · oh yes') : '');
+    jLogRoll((count > 1 ? count : '') + 'd' + sides + ' = ' + total + (count > 1 ? ' (' + rolls.join('+') + ')' : ''));
   });
 });
 
@@ -1084,6 +1243,7 @@ function boot(){
   }
   V = generate(seed);
   render();
+  jLoad();
   window.scrollTo({ top: 0 });
 }
 window.addEventListener('hashchange', boot);
