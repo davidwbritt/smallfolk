@@ -229,6 +229,10 @@
     font-size:9.5px;letter-spacing:.1em;color:var(--ink-soft);
     text-align:center;min-height:14px;text-transform:uppercase;
   }
+  .dice .olabel{
+    font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);
+    margin:9px 0 5px;border-top:1px dotted var(--rule);padding-top:8px;
+  }
   @media (max-width:760px){ .dice{width:160px} }
 
   @media (max-width:760px){
@@ -286,6 +290,11 @@
       <button data-d="4">d4</button><button data-d="6">d6</button><button data-d="8">d8</button>
       <button data-d="10">d10</button><button data-d="12">d12</button><button data-d="20">d20</button>
       <button data-d="100">d100</button><button data-d="6x2">2d6</button><button data-d="6x3">3d6</button>
+    </div>
+    <div class="olabel">Oracle — ask aloud, then:</div>
+    <div class="dbtns">
+      <button data-o="likely">likely?</button><button data-o="even">even?</button><button data-o="unlikely">unlikely?</button>
+      <button data-o="spark" style="flex-basis:100%">✶ spark</button>
     </div>
   </div>
 </aside>
@@ -1019,7 +1028,31 @@ document.getElementById('dice-head').addEventListener('click', () => {
   diceBox.classList.toggle('closed');
   document.getElementById('dice-carat').textContent = diceBox.classList.contains('closed') ? '▴' : '▾';
 });
-document.querySelectorAll('.dice .dbtns button').forEach(b => {
+/* Mythic-style oracle: ask a yes/no question, pick the odds */
+const ORACLE = {
+  likely:   ['No, but…', 'Yes, but…', 'Yes', 'Yes', 'Yes', 'Yes, and…'],
+  even:     ['No, and…', 'No', 'No, but…', 'Yes, but…', 'Yes', 'Yes, and…'],
+  unlikely: ['No, and…', 'No', 'No', 'No, but…', 'Yes, but…', 'Yes']
+};
+const SPARK_V = ['abandon', 'guard', 'betray', 'bury', 'demand', 'flee', 'offer', 'steal', 'warn', 'follow', 'forgive', 'conceal', 'bargain', 'accuse', 'return'];
+const SPARK_N = ['debt', 'lantern', 'letter', 'stranger', 'grave', 'oath', 'key', 'harvest', 'rumor', 'blade', 'bell', 'road', 'child', 'fire', 'name'];
+document.querySelectorAll('.dice .dbtns button[data-o]').forEach(b => {
+  b.addEventListener('click', () => {
+    const kind = b.getAttribute('data-o');
+    const res = document.getElementById('dice-res');
+    const log = document.getElementById('dice-log');
+    if (kind === 'spark'){
+      res.innerHTML = '<span style="font-size:19px">' + SPARK_V[Math.floor(Math.random() * SPARK_V.length)] + ' the ' + SPARK_N[Math.floor(Math.random() * SPARK_N.length)] + '</span>';
+      log.textContent = 'spark · interpret freely';
+      return;
+    }
+    const roll = Math.floor(Math.random() * 6);
+    const ans = ORACLE[kind][roll];
+    res.innerHTML = '<span style="font-size:22px">' + ans + '</span>';
+    log.textContent = 'oracle · ' + kind + (Math.random() < 0.08 ? ' · and something changes…' : '');
+  });
+});
+document.querySelectorAll('.dice .dbtns button[data-d]').forEach(b => {
   b.addEventListener('click', () => {
     const spec = b.getAttribute('data-d');
     let sides, count = 1;

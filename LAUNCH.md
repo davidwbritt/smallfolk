@@ -37,6 +37,25 @@ the community is loudly tired of both.
 existing seeds generate. Fine pre-launch; after launch, batch content drops and
 mention "the survey has been revised" in release notes.
 
+## The catch-fire angle (last30days research, 2026-07-10)
+
+Fresh signal from r/Solo_Roleplaying: the month's #2 thread by engagement
+(116pts / 76 comments) is titled "solo journaling games for absolute
+beginners **(no AI)**" — the community writes *no AI* into its request
+titles — while a builder's "AI Oracle" tool post sat at **zero points** in
+the same sub. Three conclusions:
+
+1. **"No AI" is a demand keyword, not a footnote.** It goes in post TITLES:
+   "…no AI, no accounts, just tables."
+2. **Solo roleplaying is the hot underserved lane.** Smallfolk already
+   generates what solo players keep asking for (mysteries with suspects and
+   clue-rumors); with the dice tray's oracle (likely/even/unlikely + spark
+   words) it's a complete solo mystery sandbox in one click.
+   → r/Solo_Roleplaying moves to the FRONT of the launch queue, with
+   solo-play framing, before the GM-tools subs.
+3. **#daily is the ritual hook** — a "village of the day" link that sidebars,
+   Discord bots, and daily-thread posters can cite forever.
+
 ## Phase C — Launch week (Dave posts, Claude drafts everything)
 
 Post schedule — one community per day, never cross-post same-day, always
@@ -44,7 +63,10 @@ reply to every comment for the first 24h:
 
 1. **itch.io** release (free / pay-what-you-want) — quiet soft launch,
    catches organic browse traffic forever
-2. **r/DMToolkit** (self-promo friendly) — "I made a one-page village
+2. **r/Solo_Roleplaying** — "One click gives you a village, ten suspects,
+   a d8 rumor table, and an oracle. No AI, works offline." Lead with a
+   solo session vignette, not the feature list.
+3. **r/DMToolkit** (self-promo friendly) — "I made a one-page village
    generator where the rumors are actually about the NPCs"
 3. **r/rpg_generators** — technical angle: seeded, deterministic, one file
 4. **r/osr** — the aesthetic is deeply OSR; lead with a printed sheet photo
