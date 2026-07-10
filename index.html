@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smallfolk — a whole village on one page</title>
+<meta name="description" content="One-click fantasy villages for tabletop GMs: a dozen NPCs with interlocking secrets, a tavern, a rumor table, and one good Trouble — on a single printable page. No AI, no accounts, no ads.">
+<meta property="og:title" content="Smallfolk — a whole village on one page">
+<meta property="og:description" content="Ten villagers, their secrets, their tavern, their Trouble. Seeded, shareable, printable. Free forever.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --paper:#f7f4ec;
+    --ink:#1d1a14;
+    --ink-soft:#6b6353;
+    --rule:#c9c2b0;
+    --red:#a02c20;          /* the GM's pen — everything in red is secret */
+    --display:'Didot','Bodoni MT','Playfair Display','Baskerville','Times New Roman',serif;
+    --body:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;
+    --util:'Optima','Candara','Gill Sans','Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#dcd6c6;
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.5;
+    padding:70px 14px 60px;
+  }
+  ::selection{background:var(--ink);color:var(--paper)}
+  :focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    position:fixed;top:0;left:0;right:0;z-index:30;
+    background:var(--ink);color:var(--paper);
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    padding:9px 14px;
+    font-family:var(--util);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  }
+  .toolbar .brand{font-family:var(--display);font-size:16px;letter-spacing:.06em;text-transform:none;margin-right:8px}
+  .toolbar .brand small{font-family:var(--util);font-size:9.5px;letter-spacing:.18em;opacity:.7;text-transform:uppercase;margin-left:8px}
+  .toolbar button, .toolbar a.tb{
+    background:none;border:1px solid rgba(247,244,236,.4);color:var(--paper);
+    font:inherit;letter-spacing:inherit;text-transform:inherit;
+    padding:6px 12px;cursor:pointer;border-radius:2px;text-decoration:none;
+  }
+  .toolbar button:hover, .toolbar a.tb:hover{background:rgba(247,244,236,.14)}
+  .toolbar .spacer{flex:1}
+  .toolbar .heart{border-color:rgba(255,160,140,.55);color:#ffb3a3}
+  .toolbar button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+
+  /* ---------- the sheet ---------- */
+  .sheet{
+    max-width:880px;margin:0 auto;background:var(--paper);
+    border:1px solid #b9b19c;
+    box-shadow:0 24px 50px -24px rgba(30,25,15,.55);
+    padding:44px 48px 38px;
+  }
+  .stamp{
+    float:right;margin:-6px -8px 8px 14px;
+    font-family:var(--util);font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-soft);border:1.5px solid var(--ink-soft);border-radius:50%;
+    width:92px;height:92px;display:flex;align-items:center;justify-content:center;
+    text-align:center;line-height:1.5;transform:rotate(7deg);opacity:.65;
+    padding:10px;
+  }
+  .masthead{border-bottom:3px double var(--ink);padding-bottom:14px}
+  .masthead .over{
+    font-family:var(--util);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .masthead h1{
+    font-family:var(--display);font-weight:500;font-size:clamp(30px,4.5vw,44px);
+    line-height:1.05;margin:6px 0 4px;
+  }
+  .masthead .sub{font-style:italic;color:var(--ink-soft);font-size:15px}
+  .vitals{
+    display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;
+    font-family:var(--util);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .vitals b{color:var(--ink);font-weight:400}
+
+  section{margin-top:30px}
+  h2.sec{
+    font-family:var(--util);font-weight:400;font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+    border-bottom:1px solid var(--ink);padding-bottom:5px;margin-bottom:14px;
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  h2.sec .n{color:var(--ink-soft);font-size:10px;letter-spacing:.2em}
+
+  /* the GM's red pen */
+  .gm{color:var(--red)}
+  .gm-block{
+    border:1.5px solid var(--red);color:var(--red);
+    padding:12px 16px;border-radius:2px;position:relative;
+  }
+  .gm-block::before{
+    content:"GM ONLY";position:absolute;top:-8px;left:12px;background:var(--paper);
+    font-family:var(--util);font-size:8.5px;letter-spacing:.26em;padding:0 6px;
+  }
+  body.player-view .gm, body.player-view .gm-block{display:none !important}
+
+  /* ---------- people ---------- */
+  .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:18px 20px}
+  .person{display:flex;gap:12px;align-items:flex-start;break-inside:avoid}
+  .person svg{width:64px;height:auto;flex:none;border:1px solid var(--rule);background:#fbf9f3}
+  .person h3{font-family:var(--body);font-weight:700;font-size:15.5px;line-height:1.25}
+  .person .role{
+    font-family:var(--util);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);
+    margin-bottom:3px;
+  }
+  .person p{font-size:13px;line-height:1.45}
+  .person .want{font-style:italic}
+  .person .secret{font-size:12.5px;margin-top:2px}
+
+  /* ---------- places ---------- */
+  .places{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .place h3{font-family:var(--body);font-weight:700;font-size:16px}
+  .place .kind{font-family:var(--util);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+  .place p{font-size:13.5px;margin-top:4px}
+  table.menu{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+  table.menu td{padding:3px 0;border-bottom:1px dotted var(--rule)}
+  table.menu td:last-child{text-align:right;white-space:nowrap;font-family:var(--util);font-size:11px;letter-spacing:.06em}
+  .patrons{margin-top:8px;font-size:13px}
+  .patrons li{margin-left:16px;padding:1.5px 0}
+
+  /* ---------- rumors ---------- */
+  ol.rumors{counter-reset:r;list-style:none}
+  ol.rumors li{
+    counter-increment:r;display:flex;gap:10px;align-items:baseline;
+    padding:6px 0;border-bottom:1px dotted var(--rule);font-size:13.5px;
+  }
+  ol.rumors li::before{
+    content:counter(r);flex:none;width:22px;height:22px;border:1px solid var(--ink);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:var(--util);font-size:10.5px;
+  }
+  ol.rumors .who{font-style:italic;color:var(--ink-soft)}
+  ol.rumors .tf{font-family:var(--util);font-size:9.5px;letter-spacing:.14em;white-space:nowrap;margin-left:auto;padding-left:10px}
+
+  /* ---------- trouble & hooks ---------- */
+  .trouble h3{font-family:var(--display);font-weight:500;font-size:20px;margin-bottom:6px;color:var(--red)}
+  .trouble p{font-size:13.5px}
+  .hooks li{margin-left:18px;padding:4px 0;font-size:13.5px}
+
+  /* ---------- map ---------- */
+  .maprow{display:grid;grid-template-columns:minmax(260px,1fr) minmax(200px,260px);gap:24px;align-items:start}
+  .mapbox{border:1px solid var(--rule);background:#fbf9f3;padding:6px}
+  .mapbox svg{width:100%;height:auto;display:block}
+  .legend{font-size:12.5px}
+  .legend ol{list-style:none}
+  .legend li{padding:1px 0}
+
+  footer.colophon{
+    margin-top:34px;padding-top:12px;border-top:3px double var(--ink);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    font-family:var(--util);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  footer.colophon a{color:var(--red);text-decoration:none}
+  footer.colophon a:hover{text-decoration:underline}
+
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:40;
+    background:var(--ink);color:var(--paper);padding:10px 20px;border-radius:2px;
+    font-family:var(--util);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  }
+
+  @media (max-width:760px){
+    .sheet{padding:28px 20px}
+    .places,.maprow{grid-template-columns:1fr}
+    .stamp{display:none}
+  }
+  @media print{
+    body{background:#fff;padding:0}
+    .toolbar,.toast{display:none !important}
+    .sheet{border:none;box-shadow:none;max-width:none;padding:10px 6px}
+    .person,.place,section{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<nav class="toolbar" aria-label="Controls">
+  <span class="brand">Smallfolk<small>a whole village on one page</small></span>
+  <button id="btn-new">New village</button>
+  <button id="btn-view" aria-pressed="false">Player view</button>
+  <button id="btn-md">Copy markdown</button>
+  <button id="btn-print">Print</button>
+  <span class="spacer"></span>
+  <a class="tb heart" id="btn-tip" href="#" target="_blank" rel="noopener">♥ Tip the innkeeper</a>
+</nav>
+<main class="sheet" id="sheet" aria-live="polite"></main>
+
+<script>
+'use strict';
+
+/* If Smallfolk saved you a prep night, the tip link keeps it alive. */
+const SUPPORT_URL = 'https://ko-fi.com/clevermonkey';
+
+/* ================= seeded randomness ================= */
+function xmur3(str){
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++){
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function(){
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+function mulberry32(a){
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function makeRng(s){ const h = xmur3(s); return mulberry32(h()); }
+function pick(rng, arr){ return arr[Math.floor(rng() * arr.length)]; }
+function rint(rng, a, b){ return a + Math.floor(rng() * (b - a + 1)); }
+function chance(rng, p){ return rng() < p; }
+function shuffle(rng, arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+/* ================= name banks ================= */
+const M_FIRST = ['Aldous','Bran','Cott','Dunstan','Eldred','Fenn','Garrick','Hob','Ivo','Jory','Kel','Lambert','Marrow','Ned','Osmund','Perrin','Rooke','Silas','Tam','Wat','Yorick','Brey'];
+const F_FIRST = ['Aggie','Bess','Carys','Della','Enid','Ffion','Greta','Hilde','Isolde','Jenna','Kessa','Liss','Maren','Nell','Orla','Pip','Rowan','Sable','Tansy','Verna','Wren','Ysolt'];
+const BYNAMES = ['Thatcher','Underhill','Croft','Millward','Fernsby','Blackbarrow','Weir','Ashdown','Copperwright','Hollis','Bracken','Stoat','Danesmoor','Pryce','Quill','Rushbrook','Marlow','Gorse','Tanner','Wick','Harrowgate','Slee'];
+const VILLAGE_A = ['Wether','Bram','Osten','Crow','Hazel','Marl','Dun','Sorrel','Grim','Ash','Elder','Fenn','Harrow','Tarn','Wyke','Bird'];
+const VILLAGE_B = ['bourne','stead','wick','hollow','combe','mere','thorpe','den','field','bridge','moor','worth','cote','fold','well','marsh'];
+const REGIONS = ['on the old salt road','a day’s ride from anywhere','where the moor meets the barley','at the last bridge before the hills','in the crook of the river','under the beacon hill','on the pilgrim way','at the edge of the King’s Wood'];
+const NOTES = ['The ale is better than the road.','Lock nothing; everyone knows everything.','Strangers are news. You are news.','Founded twice; nobody discusses the first time.','Prosperous, in a guarded way.','The bell rings for weather, war, and gossip.'];
+const DEITIES = [
+  { name: 'the Weeping Lady', domain: 'rain, mercy, and mourning', rite: 'coins left in the font' },
+  { name: 'the Old Warden', domain: 'boundaries, oaths, and gates', rite: 'a nail hammered in at equinox' },
+  { name: 'Saint Maundy', domain: 'harvests and honest scales', rite: 'first loaf given to a stranger' },
+  { name: 'the Drowned Piper', domain: 'rivers, luck, and drink', rite: 'a splash poured out before the first sip' },
+  { name: 'the Quiet Sister', domain: 'sleep, secrets, and bees', rite: 'telling the hive of every death' },
+  { name: 'the Antler King', domain: 'the wood, the hunt, and winter', rite: 'no fires in the forest on the dark moon' }
+];
+
+/* ================= woodcut portraits ================= */
+const INK = '#1d1a14';
+function portraitSVG(rng, sex, age){
+  const old = age >= 52, young = age <= 22;
+  let s = '';
+  const st = 'fill="none" stroke="' + INK + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const thin = 'fill="none" stroke="' + INK + '" stroke-width="1.3" stroke-linecap="round"';
+
+  /* garment + shoulders */
+  const garment = pick(rng, ['tunic', 'tunic', 'collar', 'shawl', 'hood']);
+  if (garment === 'hood'){
+    s += '<path d="M22 140 v-28 q0 -44 38 -44 q38 0 38 44 v28" ' + st + '/>' +
+         '<path d="M35 140 v-24 q0 -30 25 -30 q25 0 25 30 v24" ' + thin + '/>';
+  } else {
+    s += '<path d="M22 140 q2 -26 20 -32 q8 -3 18 -3 q10 0 18 3 q18 6 20 32" ' + st + '/>';
+    if (garment === 'collar') s += '<path d="M44 112 l16 12 l16 -12" ' + thin + '/>';
+    if (garment === 'shawl') s += '<path d="M30 124 q30 16 60 0 M32 131 q28 14 56 0" ' + thin + '/>';
+    if (garment === 'tunic') s += '<path d="M60 112 v14" ' + thin + '/><circle cx="60" cy="130" r="1.6" fill="' + INK + '"/>';
+  }
+  /* neck */
+  s += '<path d="M52 96 v12 M68 96 v12" ' + st + '/>';
+
+  /* head */
+  const headKind = pick(rng, ['oval', 'round', 'square', 'narrow']);
+  if (headKind === 'oval') s += '<ellipse cx="60" cy="64" rx="21" ry="27" ' + st + '/>';
+  else if (headKind === 'round') s += '<circle cx="60" cy="66" r="24" ' + st + '/>';
+  else if (headKind === 'narrow') s += '<ellipse cx="60" cy="64" rx="17" ry="28" ' + st + '/>';
+  else s += '<path d="M39 58 q0 -22 21 -22 q21 0 21 22 v10 q0 12 -10 18 q-5 3 -11 3 q-6 0 -11 -3 q-10 -6 -10 -18 z" ' + st + '/>';
+
+  /* ears */
+  s += '<path d="M39 66 q-4 2 -1 8 M81 66 q4 2 1 8" ' + thin + '/>';
+
+  /* hair (skip if hooded) */
+  if (garment !== 'hood'){
+    const hairs = sex === 'f'
+      ? ['long', 'bun', 'braids', 'curls', 'kerchief', 'long', 'cropped']
+      : ['cropped', 'tousled', 'bald', 'curls', 'long', 'cropped', 'bald'];
+    const hair = old && chance(rng, 0.4) ? (sex === 'f' ? 'kerchief' : 'bald') : pick(rng, hairs);
+    if (hair === 'cropped') s += '<path d="M40 56 q2 -18 20 -18 q18 0 20 18 q-8 -8 -20 -8 q-12 0 -20 8" fill="' + INK + '"/>';
+    if (hair === 'tousled') s += '<path d="M38 58 q-2 -10 6 -12 q-1 -8 8 -8 q3 -6 10 -3 q8 -4 11 3 q9 -1 8 8 q7 3 5 12 q-9 -9 -24 -9 q-15 0 -24 9" fill="' + INK + '"/>';
+    if (hair === 'bald') s += '<path d="M42 52 q4 -4 8 -3 M70 49 q6 0 8 4" ' + thin + '/>';
+    if (hair === 'curls'){ for (let i = 0; i < 7; i++){ s += '<circle cx="' + (41 + i * 6.3) + '" cy="' + (44 - Math.sin(i / 6 * Math.PI) * 7) + '" r="5" fill="' + INK + '"/>'; } }
+    if (hair === 'long') s += '<path d="M39 60 q-3 -24 21 -24 q24 0 21 24 l3 34 q-6 4 -10 -2 l-2 -26 q-12 -7 -24 0 l-2 26 q-4 6 -10 2 z" fill="' + INK + '"/>';
+    if (hair === 'bun') s += '<path d="M40 56 q2 -18 20 -18 q18 0 20 18 q-8 -8 -20 -8 q-12 0 -20 8" fill="' + INK + '"/><circle cx="84" cy="44" r="7" fill="' + INK + '"/>';
+    if (hair === 'braids'){
+      s += '<path d="M40 56 q2 -18 20 -18 q18 0 20 18 q-8 -8 -20 -8 q-12 0 -20 8" fill="' + INK + '"/>' +
+           '<path d="M42 62 q-4 20 2 36 M78 62 q4 20 -2 36" stroke="' + INK + '" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+           '<path d="M41 74 h6 M40 86 h6 M73 74 h6 M74 86 h6" ' + thin + '/>';
+    }
+    if (hair === 'kerchief') s += '<path d="M38 62 q-4 -26 22 -26 q26 0 22 26 q-2 -14 -22 -14 q-20 0 -22 14 z" fill="' + INK + '"/><path d="M80 60 q8 6 4 14" ' + thin + '/>';
+  }
+
+  /* brows + eyes */
+  const brow = pick(rng, ['flat', 'stern', 'raised']);
+  if (brow === 'flat') s += '<path d="M46 60 h9 M65 60 h9" ' + st + '/>';
+  if (brow === 'stern') s += '<path d="M46 59 l9 3 M74 59 l-9 3" ' + st + '/>';
+  if (brow === 'raised') s += '<path d="M46 61 q4 -4 9 -1 M65 60 q4 -3 9 1" ' + st + '/>';
+  const eye = pick(rng, ['dot', 'dot', 'tired', 'wide']);
+  if (eye === 'dot') s += '<circle cx="50.5" cy="67" r="1.8" fill="' + INK + '"/><circle cx="69.5" cy="67" r="1.8" fill="' + INK + '"/>';
+  if (eye === 'tired') s += '<path d="M47 67 h7 M66 67 h7" ' + st + '/><path d="M48 71 h5 M67 71 h5" ' + thin + '/>';
+  if (eye === 'wide') s += '<circle cx="50.5" cy="67" r="3" ' + thin + '/><circle cx="69.5" cy="67" r="3" ' + thin + '/><circle cx="50.5" cy="67" r="1.2" fill="' + INK + '"/><circle cx="69.5" cy="67" r="1.2" fill="' + INK + '"/>';
+
+  /* nose */
+  const nose = pick(rng, ['l', 'hook', 'button', 'long']);
+  if (nose === 'l') s += '<path d="M60 68 v10 h4" ' + st + '/>';
+  if (nose === 'hook') s += '<path d="M60 68 q6 5 1 11" ' + st + '/>';
+  if (nose === 'button') s += '<path d="M57 77 q3 3 6 0" ' + st + '/>';
+  if (nose === 'long') s += '<path d="M60 66 v13 M57 79 h6" ' + st + '/>';
+
+  /* mouth */
+  const mouth = pick(rng, ['line', 'smile', 'frown', 'wry']);
+  if (mouth === 'line') s += '<path d="M53 87 h14" ' + st + '/>';
+  if (mouth === 'smile') s += '<path d="M53 86 q7 5 14 0" ' + st + '/>';
+  if (mouth === 'frown') s += '<path d="M53 89 q7 -4 14 0" ' + st + '/>';
+  if (mouth === 'wry') s += '<path d="M54 87 q7 3 13 -2" ' + st + '/>';
+
+  /* facial hair */
+  if (sex === 'm' && !young && chance(rng, 0.55)){
+    const fh = pick(rng, ['full', 'goatee', 'mustache', 'stubble']);
+    if (fh === 'full') s += '<path d="M41 70 q0 26 19 26 q19 0 19 -26 q-4 16 -19 16 q-15 0 -19 -16 z" fill="' + INK + '"/>';
+    if (fh === 'goatee') s += '<path d="M54 92 q6 8 12 0 l-2 8 q-4 4 -8 0 z" fill="' + INK + '"/>';
+    if (fh === 'mustache') s += '<path d="M51 84 q9 6 18 0 q-4 5 -9 5 q-5 0 -9 -5 z" fill="' + INK + '"/>';
+    if (fh === 'stubble'){ for (let i = 0; i < 12; i++){ s += '<circle cx="' + (48 + (i % 6) * 5) + '" cy="' + (88 + Math.floor(i / 6) * 5) + '" r=".8" fill="' + INK + '"/>'; } }
+  }
+
+  /* age & character marks */
+  if (old) s += '<path d="M44 74 q-2 3 0 6 M76 74 q2 3 0 6 M52 58 q-3 -2 -5 0 M68 58 q3 -2 5 0" ' + thin + '/>';
+  if (chance(rng, 0.16)) s += '<path d="M' + rint(rng, 44, 70) + ' ' + rint(rng, 52, 58) + ' l7 9" ' + thin + '/>';  /* scar */
+  if (chance(rng, 0.14)) s += '<circle cx="' + (chance(rng, 0.5) ? 38 : 82) + '" cy="76" r="2.2" ' + thin + '/>';   /* earring */
+  if (chance(rng, 0.1)) s += '<circle cx="50.5" cy="67" r="5.5" ' + thin + '/><circle cx="69.5" cy="67" r="5.5" ' + thin + '/><path d="M56 67 h8" ' + thin + '/>'; /* spectacles */
+  if (chance(rng, 0.12) && sex === 'm') s += '<path d="M66 88 q10 4 12 12" ' + thin + '/><ellipse cx="80" cy="102" rx="4" ry="3" ' + thin + '/>'; /* pipe */
+
+  /* woodcut hatching */
+  for (let i = 0; i < 4; i++){
+    s += '<path d="M' + (30 + i * 2) + ' ' + (118 + i * 4) + ' l' + (10 - i) + ' -3" stroke="' + INK + '" stroke-width=".8" opacity=".55"/>';
+  }
+  return '<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Portrait">' + s + '</svg>';
+}
+
+/* ================= the survey map ================= */
+function mapSVG(rng, V){
+  const thin = 'fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round"';
+  let s = '';
+  /* the road */
+  s += '<path d="M6 128 C 80 100, 180 150, 314 112" fill="none" stroke="' + INK + '" stroke-width="2.5" stroke-dasharray="7 4"/>';
+  s += '<path d="M150 132 C 160 100, 150 60, 170 18" fill="none" stroke="' + INK + '" stroke-width="1.8" stroke-dasharray="5 4"/>';
+  /* river, sometimes */
+  if (V.hasRiver){
+    s += '<path d="M250 6 q-20 40 -6 74 q14 34 -8 62 q-10 14 -30 22" fill="none" stroke="' + INK + '" stroke-width="1.4"/>' +
+         '<path d="M258 6 q-20 40 -6 74 q14 34 -8 62 q-10 14 -28 24" fill="none" stroke="' + INK + '" stroke-width="1"/>' +
+         '<path d="M234 118 l30 8 M238 110 l4 20 M252 114 l4 20" ' + thin + '/>';
+  }
+  /* keyed buildings */
+  const slots = shuffle(rng, [[62, 96], [118, 128], [188, 112], [242, 132], [92, 142], [206, 84], [274, 104], [142, 88]]);
+  const keyed = [
+    { n: 1, w: 22, h: 15 }, { n: 2, w: 16, h: 13 }, { n: 3, w: 15, h: 17 }, { n: 4, w: 18, h: 13 }
+  ];
+  keyed.forEach((k, i) => {
+    const [x, y] = slots[i];
+    const rot = rint(rng, -14, 14);
+    s += '<g transform="rotate(' + rot + ' ' + x + ' ' + y + ')">' +
+      '<rect x="' + (x - k.w / 2) + '" y="' + (y - k.h / 2) + '" width="' + k.w + '" height="' + k.h + '" fill="#fbf9f3" stroke="' + INK + '" stroke-width="1.6"/>' +
+      '<path d="M' + (x - k.w / 2 - 2) + ' ' + (y - k.h / 2) + ' L' + x + ' ' + (y - k.h / 2 - 7) + ' L' + (x + k.w / 2 + 2) + ' ' + (y - k.h / 2) + '" ' + thin + '/>' +
+      '</g>' +
+      '<circle cx="' + (x + k.w / 2 + 8) + '" cy="' + (y - k.h / 2 - 4) + '" r="6.5" fill="#fbf9f3" stroke="' + INK + '" stroke-width="1"/>' +
+      '<text x="' + (x + k.w / 2 + 8) + '" y="' + (y - k.h / 2 - 1) + '" text-anchor="middle" font-family="Optima,Candara,sans-serif" font-size="8" fill="' + INK + '">' + k.n + '</text>';
+  });
+  /* cottages */
+  for (let i = 4; i < 4 + rint(rng, 3, 4); i++){
+    const [x, y] = slots[i];
+    const rot = rint(rng, -20, 20);
+    s += '<g transform="rotate(' + rot + ' ' + x + ' ' + y + ')"><rect x="' + (x - 6) + '" y="' + (y - 5) + '" width="12" height="10" fill="#fbf9f3" stroke="' + INK + '" stroke-width="1.1"/></g>';
+  }
+  /* trees */
+  for (let i = 0; i < rint(rng, 8, 14); i++){
+    const tx = chance(rng, 0.5) ? rint(rng, 8, 60) : rint(rng, 270, 312);
+    const ty = rint(rng, 12, 70);
+    s += '<circle cx="' + tx + '" cy="' + ty + '" r="' + rint(rng, 4, 7) + '" ' + thin + '/>';
+  }
+  /* field */
+  s += '<g ' + thin + ' opacity=".6"><path d="M10 176 h70 M10 184 h70 M10 192 h70 M10 168 h70"/><path d="M8 162 l76 0 l0 36 l-76 0 z" stroke-width="1.2"/></g>';
+  /* compass + scale */
+  s += '<g ' + thin + '><circle cx="300" cy="180" r="12"/><path d="M300 190 v-20"/><path d="M300 168 l-4 7 h8 z" fill="' + INK + '"/></g>' +
+    '<text x="300" y="163" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="' + INK + '">N</text>' +
+    '<path d="M120 196 h50" ' + thin + '/><path d="M120 193 v6 M170 193 v6" ' + thin + '/>' +
+    '<text x="145" y="190" text-anchor="middle" font-family="Optima,Candara,sans-serif" font-size="7" letter-spacing="1" fill="' + INK + '">ONE FURLONG</text>';
+  return '<svg viewBox="0 0 320 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of the village">' + s + '</svg>';
+}
+
+/* ================= the engine ================= */
+const LOOKS = ['flour to the elbows', 'a face like weather', 'burn-scarred forearms', 'too well dressed for here', 'a limp that changes sides', 'eyes that count the exits', 'hands that have buried things', 'a smile kept for customers', 'boots worth more than the house', 'a voice sanded smooth', 'ink on the fingers, oddly', 'strong as a gate and shy as one'];
+const MANNERS = ['talks in questions', 'never sits with their back to the door', 'laughs one beat too late', 'feeds every dog they meet', 'quotes a grandmother constantly', 'whittles while listening', 'prays quickly before lying', 'remembers every debt, both kinds', 'hums when nervous, which is often', 'touches the doorframe twice, always', 'speaks to strangers in a market voice', 'says little; means all of it'];
+const WANTS = ['to leave before winter, this time truly', 'the reeve’s job, and deserves it less than anyone', 'their child home from the war', 'the shrine reroofed before the rains', 'to be believed about the lights', 'one good harvest, then they’ll rest', 'the old house back from the bank of cousins who took it', 'a letter that is late', 'to be asked to sing again', 'everyone to stop asking if they’re well', 'a proper apprentice, not the current one', 'to know who leaves flowers on the north grave'];
+const SECRETS = [
+  { t: p => p.name + ' sold the same cow twice, to two different fairs, and both buyers are due through on this road.' },
+  { t: p => p.name + ' is not from here at all; the accent is practiced, and slips at funerals.' },
+  { t: p => p.name + ' poaches the lord’s deer and salts the meat under the floor of the ' + p.role + '’s shed.' },
+  { t: (p, o) => p.name + ' is quietly in love with ' + o.name + ', and has decided to die rather than mention it.' },
+  { t: (p, o) => p.name + ' owes ' + o.name + ' more than the farm is worth, and the notes are coming due.' },
+  { t: p => p.name + ' saw what happened to the last reeve, and was paid in silence, and the silence is heavy.' },
+  { t: (p, o) => p.name + ' keeps letters from ' + o.name + ' under the hearthstone. Some are unopened on purpose.' },
+  { t: p => p.name + ' deserted a company of soldiers years ago; a man passed through last month wearing its badge.' },
+  { t: p => p.name + ' can read, and pretends not to, having learned things in writing that were safer unlearned.' },
+  { t: (p, o) => p.name + ' fathered ' + (o.sex === 'f' ? 'a child' : 'a child') + ' the village believes is ' + o.name + '’s. Two people know. Neither is sure of the other.' },
+  { t: p => p.name + ' buried a strongbox in the wood the night of the great storm, and has never found it since.' },
+  { t: p => p.name + ' pays a beggar in the market town for news of a person they claim to have forgotten.' }
+];
+const BONDS = [
+  (a, b) => a.name + ' owes ' + b.name + ' for the winter seed, and both pretend otherwise.',
+  (a, b) => a.name + ' is courting ' + b.name + ', badly.',
+  (a, b) => a.name + ' hasn’t spoken to ' + b.name + ' since the flood, over a boat.',
+  (a, b) => a.name + ' drinks with ' + b.name + ' every market day; they call it business.',
+  (a, b) => a.name + ' swears ' + b.name + ' cheats at dice. ' + cap(b.he) + ' does.',
+  (a, b) => a.name + ' was apprenticed to ' + b.name + ' once; only one of them calls it that.'
+];
+const DISHES = [['Brown bread & dripping', '2 coppers'], ['Widow’s pottage, improving daily', '3 coppers'], ['River pike, when the river agrees', '8 coppers'], ['Mutton pie, contents seasonal', '6 coppers'], ['The good cheese (ask)', '1 silver'], ['Yesterday’s pie, discounted honestly', '3 coppers'], ['Plum brandy, from behind the bar', '1 silver'], ['Ale, the ale', '1 copper']];
+const TAV_A = ['Crooked', 'Drowned', 'Gilded', 'Limping', 'Patient', 'Second', 'Salt', 'Sleeping', 'Thirsty', 'Honest'];
+const TAV_B = ['Ram', 'Lantern', 'Sisters', 'Plough', 'Magpie', 'Kettle', 'Bridge', 'Widow', 'Crown', 'Goose'];
+const TAV_QUIRK = ['The chair by the fire belongs to a dog. This is not negotiable.', 'Songs are permitted; that song is not.', 'The dartboard has a nail where the bull should be. House rules apply.', 'Credit extends exactly as far as the chalk line on the beam.', 'The back room is “being repaired.” It has been for nine years.'];
+const DOING = [
+  (p, o) => 'nursing one ale and a grievance',
+  (p, o) => 'losing at dice to ' + o.name + ', and narrating it',
+  (p, o) => 'watching the door with professional interest',
+  (p, o) => 'standing a round they cannot afford',
+  (p, o) => 'asking strangers if they’ve come about the notice',
+  (p, o) => 'not talking to ' + o.name + ', loudly'
+];
+const HOOK_OUT = [
+  'A courier is nine days late on the road through here. Her satchel has arrived without her, carried by the mail-coach dog.',
+  'The next village over has offered a bounty on “whatever is wrong with the beacon hill.” Locals here find this hilarious, then change the subject.',
+  'A well-dressed stranger pays for a room a week in advance and asks, casually, who around here can read.',
+  'The lord’s bailiff is due within the fortnight, and several villagers are suddenly interested in hiring capable-looking travellers.'
+];
+
+const TROUBLES = [
+  {
+    title: 'Something Is Taking the Sheep',
+    symptom: 'Four ewes gone in a month, no blood, gates shut behind them.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: culprit.name + ' has been driving them off by night and selling them to a drover two valleys over, to cover a debt nobody here knows about. The gates shut behind them because ' + culprit.he + ' is careful. ' + cap(witness.name) + ' saw a figure on the fell path at dusk and has almost convinced ' + witness.him + 'self it was ' + suspect.name + ', who walks up there and has no alibi and no friends to invent one.',
+        secrets: [[culprit, culprit.name + ' is taking the sheep. It is exactly that simple, and ' + culprit.he + ' hates it.'], [witness, witness.name + ' saw someone on the fell path at dusk and is one bad evening away from naming ' + suspect.name + ' in public.']],
+        rumors: [
+          { text: 'It’s a beast out of the wood — the gates mean nothing to it.', true: false, gm: 'It means everything; it has hands.' },
+          { text: suspect.name + ' walks the fells at night. Draw your own conclusions.', true: false, gm: suspect.name + ' is innocent and increasingly afraid.' },
+          { text: 'A drover’s been buying unmarked ewes at Marlford market, cheap and no questions.', true: true, gm: 'The thread that unravels it.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'The Well Is Making Folk Sick',
+    symptom: 'Three houses down with the gripes; the water tastes of pennies.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: culprit.name + ' has been steeping hides in the old cistern uphill — cheaper than the proper pits — and the runoff finds the well. ' + cap(culprit.he) + ' has half-guessed and fully decided not to think about it. Talk has landed instead on ' + suspect.name + ', whose trade in herbs makes “poisoner” a short walk for stupid people. ' + cap(witness.name) + '’s youngest saw ' + culprit.name + ' hauling barrels before dawn and thinks it was a dream.',
+        secrets: [[culprit, culprit.name + ' knows what’s in the water, roughly, and is praying for rain in a specific and guilty way.']],
+        rumors: [
+          { text: 'It’s ' + suspect.name + ' — who else here knows poisons from porridge?', true: false, gm: 'Ugly, spreading, wrong.' },
+          { text: 'The water only turned after the last new moon.', true: true, gm: 'When the barrels started.' },
+          { text: 'Old wells sour when someone in the parish has sworn false. Everyone knows that.', true: false, gm: 'Folk theology, though it makes several people sweat.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'The Offering Box Is Light',
+    symptom: 'The shrine’s box has been short three collections running.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: culprit.name + ' takes a little each week against a debt that shames ' + culprit.him + ' more than theft does. ' + cap(witness.name) + ' — who keeps the shrine — has noticed, has guessed right, and has been putting coins in to cover it, because some accusations end villages. Suspicion has settled comfortably on ' + suspect.name + ', who once joked about the box being “the only bank that blesses you.”',
+        secrets: [[culprit, culprit.name + ' is stealing from the shrine box, hating it, and keeping count to repay it, which is how thieves comfort themselves.'], [witness, witness.name + ' knows who takes from the box and covers the shortfall in secret. The kindness cannot last past harvest.']],
+        rumors: [
+          { text: suspect.name + ' jokes about that box a little too often, doesn’t ' + suspect.he + '.', true: false, gm: 'A joke, aging badly.' },
+          { text: 'The box is only ever light after market day.', true: true, gm: 'The debt is collected on market day.' },
+          { text: 'The Lady takes her own tithe when a parish forgets her. It’s happened before.', true: false, gm: 'It has not.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'Grey Wax Letters',
+    symptom: 'Folded letters, no signature, sealed in grey wax, left under certain doors. The dogs don’t bark.',
+    weave(rng, cast, V){
+      const [culprit, va, vb] = cast;
+      return {
+        gm: culprit.name + ' writes them. ' + cap(culprit.he) + ' knows things — the kind of things below — and asks small sums, always affordable, always humiliating. ' + cap(va.name) + ' and ' + vb.name + ' have each paid twice and each believes they are the only one. The dogs don’t bark because the dogs know ' + culprit.him + '.',
+        secrets: [[culprit, culprit.name + ' is the grey-wax letter writer, and is not even greedy, which is somehow worse. The letters fund one specific, almost sympathetic thing.']],
+        rumors: [
+          { text: 'It’s someone from outside — a rider’s been seen on the north road past midnight.', true: false, gm: 'The rider is a farmer with insomnia.' },
+          { text: va.name + ' has stopped going to the tavern. Make of that what you will.', true: true, gm: 'Paying twice will do that.' },
+          { text: 'The wax is grey because it’s grave-wax. Letters from the dead.', true: false, gm: 'It is candle stubs and soot.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'The Levy Doesn’t Add Up',
+    symptom: 'The lord’s levy went up; the village ledger says it didn’t.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: culprit.name + ' has been skimming the difference — not from greed, but to pay off a man who knows what ' + culprit.he + ' did in the bad year, which is a second secret stacked under the first. ' + cap(witness.name) + ' keeps private tallies out of habit and has noticed the gap. Suspicion, when it comes, will land on ' + suspect.name + ', who handles coin and has no gift for looking innocent.',
+        secrets: [[culprit, culprit.name + ' is skimming the levy to pay a blackmailer in the market town. The books are one bailiff’s visit from failing.'], [witness, witness.name + '’s tallies could hang someone. ' + cap(witness.he) + ' hasn’t decided who deserves it.']],
+        rumors: [
+          { text: 'The lord raised the levy and ' + suspect.name + ' is pocketing the rise.', true: false, gm: 'Half right about the crime, fully wrong about the hands.' },
+          { text: 'A stranger in the market town has been drinking on ' + culprit.name + '’s coin. Twice now.', true: true, gm: 'The blackmailer, enjoying himself.' },
+          { text: 'The bailiff is coming early this year.', true: true, gm: 'He is. Ask the culprit how they sleep.' }
+        ]
+      };
+    }
+  },
+  {
+    title: 'Lights in the Barrow Field',
+    symptom: 'Cold blue lights over the old barrow, three nights running. The priest has opinions.',
+    weave(rng, cast, V){
+      const [culprit, suspect, witness] = cast;
+      return {
+        gm: 'Smugglers are caching goods in the barrow’s side-chamber, and ' + culprit.name + ' guides them in for a cut — the “lights” are shuttered lanterns and one genuinely unfortunate marsh-gas coincidence that has done wonders for the story. ' + cap(suspect.name) + ' gets the sideways looks, barrow-lore being considered ' + suspect.his + ' department. ' + cap(witness.name) + ' found a crate half-buried and reburied it, which was either wise or a confession, depending who finds out.',
+        secrets: [[culprit, culprit.name + ' walks smugglers into the barrow by the dry ditch. ' + cap(culprit.he) + ' has started recognizing the crates’ stamps and wishes ' + culprit.he + ' hadn’t.'], [witness, witness.name + ' reburied a smuggler’s crate and dreams about it.']],
+        rumors: [
+          { text: 'The dead under the barrow are awake. ' + suspect.name + ' knows why, ask ' + suspect.him + '.', true: false, gm: 'The dead are exemplary sleepers.' },
+          { text: 'The lights never show on rainy nights.', true: true, gm: 'Lanterns and dry-weather paths.' },
+          { text: 'A wagon with muffled wheels passed the ford before dawn on Ashday.', true: true, gm: 'The pickup run.' }
+        ]
+      };
+    }
+  }
+];
+
+function generate(seed){
+  const rng = makeRng('smallfolk:' + seed);
+  const V = { seed };
+  V.name = pick(rng, VILLAGE_A) + pick(rng, VILLAGE_B);
+  V.region = pick(rng, REGIONS);
+  V.note = pick(rng, NOTES);
+  V.pop = rint(rng, 61, 340);
+  V.hasRiver = chance(rng, 0.5);
+
+  /* ----- roster ----- */
+  const CORE = [['innkeeper', 'Keeper of the inn'], ['smith', 'Blacksmith'], ['keeper', 'Keeper of the shrine'], ['reeve', 'Reeve']];
+  let POOL = [['miller', 'Miller'], ['herbalist', 'Herbalist'], ['hunter', 'Hunter'], ['midwife', 'Midwife'], ['gravedigger', 'Gravedigger'], ['shepherd', 'Shepherd'], ['brewer', 'Brewer'], ['carpenter', 'Carpenter'], ['weaver', 'Weaver'], ['beekeeper', 'Beekeeper'], ['ratcatcher', 'Rat-catcher']];
+  if (V.hasRiver) POOL.push(['ferry', 'Ferryman'], ['fisher', 'Fisher']);
+  const roles = CORE.concat(shuffle(rng, POOL).slice(0, rint(rng, 5, 7)));
+  const usedNames = new Set();
+  V.npcs = roles.map((r, i) => {
+    const sex = chance(rng, 0.5) ? 'm' : 'f';
+    let first;
+    let guard = 0;
+    do { first = pick(rng, sex === 'm' ? M_FIRST : F_FIRST); } while (usedNames.has(first) && guard++ < 40);
+    usedNames.add(first);
+    return {
+      id: i, sex, first, last: pick(rng, BYNAMES),
+      he: sex === 'm' ? 'he' : 'she',
+      him: sex === 'm' ? 'him' : 'her',
+      his: sex === 'm' ? 'his' : 'her',
+      age: rint(rng, 19, 71),
+      role: r[0], roleLabel: r[1],
+      look: null, manner: null, want: null, bond: null, secret: null
+    };
+  });
+  V.npcs.forEach(p => { p.name = p.first; });
+
+  /* looks, manners, wants without repeats */
+  const looks = shuffle(rng, LOOKS), manners = shuffle(rng, MANNERS), wants = shuffle(rng, WANTS);
+  V.npcs.forEach((p, i) => { p.look = looks[i % looks.length]; p.manner = manners[i % manners.length]; p.want = wants[i % wants.length]; });
+
+  /* ----- relationships ----- */
+  const idx = shuffle(rng, V.npcs.map(p => p.id));
+  const a = V.npcs[idx[0]], b = V.npcs[idx[1]];
+  if (a.sex !== b.sex){ b.last = a.last; a.bond = 'Married to ' + b.first + ' ' + b.last + '.'; b.bond = 'Married to ' + a.first + ' ' + a.last + '.'; }
+  const c = V.npcs[idx[2]], d = V.npcs[idx[3]];
+  d.last = c.last;
+  c.bond = c.bond || (cap(c.he === 'he' ? 'brother' : 'sister') + ' to ' + d.first + ' ' + d.last + '. They divide the village between them, socially.');
+  d.bond = d.bond || (cap(d.he === 'he' ? 'brother' : 'sister') + ' to ' + c.first + ' ' + c.last + '.');
+  V.npcs.forEach(p => { p.name = p.first + ' ' + p.last; });
+  /* flavored bonds for the unbonded */
+  const loose = V.npcs.filter(p => !p.bond);
+  for (let i = 0; i + 1 < loose.length; i += 2){
+    loose[i].bond = pick(rng, BONDS)(loose[i], loose[i + 1]);
+  }
+
+  /* ----- secrets ----- */
+  const secretPool = shuffle(rng, SECRETS);
+  V.npcs.forEach((p, i) => {
+    const other = pick(rng, V.npcs.filter(o => o !== p));
+    p.secret = secretPool[i % secretPool.length].t(p, other);
+  });
+
+  /* ----- the trouble ----- */
+  const trouble = pick(rng, TROUBLES);
+  const cast = shuffle(rng, V.npcs).slice(0, 3);
+  const woven = trouble.weave(rng, cast, V);
+  woven.secrets.forEach(([p, s]) => { p.secret = s; });
+  V.trouble = { title: trouble.title, symptom: trouble.symptom, gm: woven.gm };
+
+  /* ----- rumors: 3 from the trouble, 3 from real secrets, 2 color ----- */
+  const rumors = woven.rumors.map(r => ({ ...r }));
+  const others = shuffle(rng, V.npcs.filter(p => !cast.includes(p))).slice(0, 3);
+  others.forEach(p => {
+    rumors.push({
+      text: pick(rng, [
+        'They say ' + p.name + ' isn’t sleeping. Lamp’s lit at all hours.',
+        p.name + ' has been to the market town three times this month. Three!',
+        'Ask ' + p.name + ' what’s under the hearthstone, if you’re brave.',
+        p.name + ' paid in silver last week. Silver!'
+      ]),
+      true: true,
+      gm: 'Smoke from a real fire — see ' + p.name.split(' ')[0] + '’s secret.'
+    });
+  });
+  rumors.push(
+    { text: pick(rng, ['A king slept here once, in the bad weather. Ask at the inn; the bed is shown for a copper.', 'The old road under the moor still rings if you stamp just right.', 'No magpie will land on the shrine roof. Never has.']), true: false, gm: 'Local color. Probably.' },
+    { text: pick(rng, ['There’s a room at the inn they don’t let, and won’t say why.', 'The last three reeves all left in the night. Counting is considered rude.', 'The bell was recast after it “said a name.” The old bell is buried, face down.']), true: false, gm: 'Invite the players to waste one glorious evening on this.' }
+  );
+  V.rumors = shuffle(rng, rumors).slice(0, 8).map(r => {
+    r.who = pick(rng, V.npcs).name.split(' ')[0];
+    return r;
+  });
+
+  /* ----- places ----- */
+  const inn = V.npcs.find(p => p.role === 'innkeeper');
+  const smith = V.npcs.find(p => p.role === 'smith');
+  const keeper = V.npcs.find(p => p.role === 'keeper');
+  const reeve = V.npcs.find(p => p.role === 'reeve');
+  const patrons = shuffle(rng, V.npcs.filter(p => p !== inn)).slice(0, 3);
+  V.tavern = {
+    name: 'The ' + pick(rng, TAV_A) + ' ' + pick(rng, TAV_B),
+    keeper: inn, quirk: pick(rng, TAV_QUIRK),
+    menu: shuffle(rng, DISHES).slice(0, 4),
+    patrons: patrons.map(p => ({ p, doing: pick(rng, DOING)(p, pick(rng, V.npcs.filter(o => o !== p))) }))
+  };
+  V.smithy = {
+    keeper: smith,
+    stock: shuffle(rng, [['Nails, honest, per score', '4 coppers'], ['Horseshoe & fitting', '9 coppers'], ['Plough-iron mended', '2 silvers'], ['Knife, kitchen or otherwise', '1 silver'], ['A sword, old. No questions asked or answered.', '9 silvers'], ['Hinges that outlive the door', '6 coppers']]).slice(0, 4),
+    note: pick(rng, ['Pays for barrow-iron, no questions.', 'The forge is lit before the birds. Nobody knows when it sleeps.', 'Won’t shoe a horse on the dark moon. Won’t say why.'])
+  };
+  V.shrine = { deity: pick(rng, DEITIES), keeper };
+  V.reeveHall = { keeper: reeve };
+
+  /* ----- hooks, posted at the moot hall ----- */
+  const wanter = pick(rng, V.npcs.filter(p => !cast.includes(p)));
+  V.hooks = [
+    'REWARD. — The moot offers 2 silver shillings for the plain truth of the matter of: “' + V.trouble.symptom + '” Apply to the reeve. Time-wasters will be remembered.',
+    'HELP WANTED. — ' + wanter.name + ' (' + wanter.roleLabel.toLowerCase() + ') seeks capable persons for a private matter. Discretion valued above competence, though bring both.',
+    pick(rng, HOOK_OUT)
+  ];
+  return V;
+}
+
+/* ================= rendering ================= */
+let V = null;
+
+function personCard(p, rng){
+  return '<div class="person">' + portraitSVG(rng, p.sex, p.age) +
+    '<div><div class="role">' + esc(p.roleLabel) + ' · ' + p.age + '</div>' +
+    '<h3>' + esc(p.name) + '</h3>' +
+    '<p>' + esc(cap(p.look)) + '; ' + esc(p.manner) + '.</p>' +
+    '<p class="want">Wants ' + esc(p.want) + '.</p>' +
+    (p.bond ? '<p>' + esc(p.bond) + '</p>' : '') +
+    '<p class="secret gm">✎ ' + esc(p.secret) + '</p>' +
+    '</div></div>';
+}
+
+function render(){
+  const rng = makeRng('render:' + V.seed);
+  const t = V.tavern, s = V.smithy, sh = V.shrine;
+  let h = '';
+
+  h += '<div class="stamp">Smallfolk survey · sheet no. ' + (1 + (xmur3(V.seed)() % 899)) + '</div>';
+  h += '<header class="masthead">' +
+    '<div class="over">Parish survey · one page · ' + esc(V.region) + '</div>' +
+    '<h1>' + esc(V.name) + '</h1>' +
+    '<div class="sub">' + esc(V.note) + ' &nbsp;·&nbsp; Talk of the village: “' + esc(V.trouble.symptom) + '”</div>' +
+    '<div class="vitals"><span>Souls <b>' + V.pop + '</b></span><span>Of note <b>' + V.npcs.length + '</b></span><span>Rumors abroad <b>' + V.rumors.length + '</b></span><span>Seed <b>' + esc(V.seed) + '</b></span></div>' +
+    '</header>';
+
+  /* map + legend */
+  h += '<section class="maprow"><div class="mapbox">' + mapSVG(makeRng('map:' + V.seed), V) + '</div>' +
+    '<div class="legend"><h2 class="sec">The Lay of It</h2><ol>' +
+    '<li><b>1.</b> ' + esc(t.name) + ' — inn</li>' +
+    '<li><b>2.</b> The smithy</li>' +
+    '<li><b>3.</b> Shrine of ' + esc(sh.deity.name) + '</li>' +
+    '<li><b>4.</b> The moot hall</li>' +
+    '</ol><p style="margin-top:8px;font-style:italic;color:var(--ink-soft)">The rest is cottages, mud, and opinion.' + (V.hasRiver ? ' The river is called the river.' : '') + '</p></div></section>';
+
+  /* people */
+  h += '<section><h2 class="sec">The People <span class="n">appearance · manner · wants · and in red, what the GM knows</span></h2>' +
+    '<div class="people">' + V.npcs.map(p => personCard(p, makeRng('face:' + V.seed + ':' + p.id))).join('') + '</div></section>';
+
+  /* places */
+  h += '<section><h2 class="sec">Four Doors Worth Knocking On</h2><div class="places">';
+  h += '<div class="place"><div class="kind">1 · The Inn</div><h3>' + esc(t.name) + '</h3>' +
+    '<p>Kept by ' + esc(t.keeper.name) + '. ' + esc(t.quirk) + '</p>' +
+    '<table class="menu">' + t.menu.map(m => '<tr><td>' + esc(m[0]) + '</td><td>' + esc(m[1]) + '</td></tr>').join('') + '</table>' +
+    '<div class="patrons"><b style="font-size:12px">Tonight:</b><ul>' + t.patrons.map(x => '<li>' + esc(x.p.name.split(' ')[0]) + ', ' + esc(x.doing) + '.</li>').join('') + '</ul></div></div>';
+  h += '<div class="place"><div class="kind">2 · The Smithy</div><h3>' + esc(s.keeper.name.split(' ')[0]) + '’s Forge</h3>' +
+    '<p>' + esc(s.note) + '</p>' +
+    '<table class="menu">' + s.stock.map(m => '<tr><td>' + esc(m[0]) + '</td><td>' + esc(m[1]) + '</td></tr>').join('') + '</table></div>';
+  h += '<div class="place"><div class="kind">3 · The Shrine</div><h3>Shrine of ' + esc(sh.deity.name) + '</h3>' +
+    '<p>' + cap(esc(sh.deity.name)) + ' keeps ' + esc(sh.deity.domain) + '. Local custom: ' + esc(sh.deity.rite) + '. Kept by ' + esc(sh.keeper.name) + '.</p></div>';
+  h += '<div class="place"><div class="kind">4 · The Moot Hall</div><h3>Posted at the Door</h3>' +
+    V.hooks.map(k => '<p style="border:1px solid var(--rule);padding:8px 10px;margin-top:8px;background:#fbf9f3">' + esc(k) + '</p>').join('') + '</div>';
+  h += '</div></section>';
+
+  /* rumors */
+  h += '<section><h2 class="sec">Heard at the ' + esc(t.name.replace(/^The /, '')) + ' <span class="n">roll a d8 · red marks are the GM’s</span></h2><ol class="rumors">' +
+    V.rumors.map(r => '<li><span>' + esc(r.text) + ' <span class="who">— ' + esc(r.who) + '</span></span>' +
+      '<span class="tf gm">' + (r.true ? 'TRUE' : 'FALSE') + ' · ' + esc(r.gm) + '</span></li>').join('') +
+    '</ol></section>';
+
+  /* the trouble */
+  h += '<section class="trouble"><div class="gm-block"><h3>The Trouble: ' + esc(V.trouble.title) + '</h3>' +
+    '<p>' + esc(V.trouble.gm) + '</p></div></section>';
+
+  h += '<footer class="colophon"><span>Smallfolk · seed “' + esc(V.seed) + '” · same seed, same village, forever</span>' +
+    '<span>no AI · no accounts · no ads · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
+
+  document.getElementById('sheet').innerHTML = h;
+  document.title = esc(V.name) + ' — Smallfolk';
+}
+
+/* ================= markdown export ================= */
+function markdown(){
+  const t = V.tavern, s = V.smithy, sh = V.shrine;
+  const L = [];
+  L.push('# ' + V.name, '*' + cap(V.region) + '. ' + V.note + '*', '');
+  L.push('**Talk of the village:** ' + V.trouble.symptom, '', 'Population ' + V.pop + ' · seed `' + V.seed + '`', '');
+  L.push('## The People');
+  V.npcs.forEach(p => {
+    L.push('', '### ' + p.name + ' — ' + p.roleLabel + ', ' + p.age);
+    L.push('- ' + cap(p.look) + '; ' + p.manner + '.');
+    L.push('- Wants ' + p.want + '.');
+    if (p.bond) L.push('- ' + p.bond);
+    L.push('- **Secret (GM):** ' + p.secret);
+  });
+  L.push('', '## ' + t.name + ' (inn)', 'Kept by ' + t.keeper.name + '. ' + t.quirk, '');
+  t.menu.forEach(m => L.push('- ' + m[0] + ' — ' + m[1]));
+  L.push('', '**Tonight:** ' + t.patrons.map(x => x.p.name.split(' ')[0] + ', ' + x.doing).join('; ') + '.');
+  L.push('', '## The Smithy', s.note, '');
+  s.stock.forEach(m => L.push('- ' + m[0] + ' — ' + m[1]));
+  L.push('', '## Shrine of ' + sh.deity.name, cap(sh.deity.name) + ' keeps ' + sh.deity.domain + '. Custom: ' + sh.deity.rite + '. Kept by ' + sh.keeper.name + '.');
+  L.push('', '## Posted at the Moot Hall');
+  V.hooks.forEach(k => L.push('- ' + k));
+  L.push('', '## Rumors (d8)');
+  V.rumors.forEach((r, i) => L.push((i + 1) + '. ' + r.text + ' *(— ' + r.who + ')* — **' + (r.true ? 'TRUE' : 'FALSE') + '**: ' + r.gm));
+  L.push('', '## The Trouble: ' + V.trouble.title + ' (GM only)', V.trouble.gm, '');
+  L.push('---', '*Made with Smallfolk — a whole village on one page. Same seed, same village, forever.*');
+  return L.join('\n');
+}
+
+/* ================= toolbar ================= */
+function toast(msg){
+  const n = document.createElement('div');
+  n.className = 'toast';
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2600);
+}
+function randomSeed(){
+  const r = Math.random;
+  return VILLAGE_A[Math.floor(r() * VILLAGE_A.length)].toLowerCase() + '-' +
+    VILLAGE_B[Math.floor(r() * VILLAGE_B.length)] + '-' + Math.floor(r() * 900 + 100);
+}
+document.getElementById('btn-new').addEventListener('click', () => { location.hash = randomSeed(); });
+document.getElementById('btn-view').addEventListener('click', function(){
+  const on = document.body.classList.toggle('player-view');
+  this.setAttribute('aria-pressed', on ? 'true' : 'false');
+  this.textContent = on ? 'GM view' : 'Player view';
+  toast(on ? 'Secrets hidden — safe to share the screen' : 'The red pen returns');
+});
+document.getElementById('btn-md').addEventListener('click', () => {
+  const md = markdown();
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(md).then(() => toast('Copied — paste into your notes'), () => toast('Copy blocked — check permissions'));
+  } else {
+    toast('Clipboard unavailable in this browser');
+  }
+});
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+document.getElementById('btn-tip').href = SUPPORT_URL;
+
+/* ================= boot ================= */
+function boot(){
+  let seed = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+  if (!seed){
+    seed = randomSeed();
+    history.replaceState(null, '', '#' + seed);
+  }
+  V = generate(seed);
+  render();
+  window.scrollTo({ top: 0 });
+}
+window.addEventListener('hashchange', boot);
+boot();
+</script>
+</body>
+</html>
