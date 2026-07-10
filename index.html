@@ -236,11 +236,22 @@
     .places,.maprow{grid-template-columns:1fr}
     .stamp{display:none}
   }
+  @page{ margin:11mm 12mm }
   @media print{
-    body{background:#fff;padding:0}
+    body{background:#fff;padding:0;font-size:12.5px}
     .toolbar,.toast,.pager,.dice,.faqwrap{display:none !important}
-    .sheet{border:none;box-shadow:none;max-width:none;padding:10px 6px}
-    .person,.place,section{break-inside:avoid}
+    .sheet{border:none;box-shadow:none;max-width:none;padding:2px 0}
+    .sheet, .gm, .gm-block, .person svg{
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+    .people{grid-template-columns:repeat(3,1fr);gap:12px 16px}
+    .places{gap:16px}
+    .person,.place,.gm-block,ol.rumors li,footer.colophon{break-inside:avoid}
+    h2.sec{break-after:avoid}
+    section{margin-top:20px}
+    .masthead h1{font-size:34px}
+    .maprow{grid-template-columns:1fr 220px;align-items:start}
   }
 </style>
 </head>
@@ -250,7 +261,7 @@
   <button id="btn-new">New village</button>
   <button id="btn-view" aria-pressed="false">Player view</button>
   <button id="btn-md">Copy markdown</button>
-  <button id="btn-print">Print</button>
+  <button id="btn-print" title="Use “Save as PDF” in the print dialog to export. Player view prints a spoiler-free handout.">Print / PDF</button>
   <span class="spacer"></span>
   <a class="tb heart" id="btn-tip" href="#" target="_blank" rel="noopener">♥ Tip the innkeeper</a>
 </nav>
@@ -261,7 +272,7 @@
 
 <aside class="faqwrap" aria-label="About Smallfolk">
   <div><h3>What is this?</h3>One click gives a GM a complete village: people, secrets, rumors, prices, and one good Trouble — cross-referenced, on one printable page. System-neutral.</div>
-  <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey.</div>
+  <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey. Link <a href="#daily">#daily</a> for the village of the day — same for everyone, new at midnight UTC.</div>
   <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
   <div><h3>Who keeps this?</h3>No AI, no accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
 </aside>
@@ -976,7 +987,11 @@ document.getElementById('btn-md').addEventListener('click', () => {
     toast('Clipboard unavailable in this browser');
   }
 });
-document.getElementById('btn-print').addEventListener('click', () => window.print());
+document.getElementById('btn-print').addEventListener('click', () => {
+  toast('Choose “Save as PDF” in the dialog to export' +
+    (document.body.classList.contains('player-view') ? ' — printing the spoiler-free player version' : ''));
+  setTimeout(() => window.print(), 450);
+});
 document.getElementById('btn-tip').href = SUPPORT_URL;
 
 /* ----- the survey has neighbouring sheets ----- */
@@ -1025,6 +1040,11 @@ document.querySelectorAll('.dice .dbtns button').forEach(b => {
 /* ================= boot ================= */
 function boot(){
   let seed = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+  if (seed === 'daily'){
+    /* the village of the day: same for everyone, turns over at midnight UTC */
+    seed = 'daily-' + new Date().toISOString().slice(0, 10);
+    history.replaceState(null, '', '#' + seed);
+  }
   if (!seed){
     seed = randomSeed();
     history.replaceState(null, '', '#' + seed);
