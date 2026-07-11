@@ -323,9 +323,19 @@
     .places,.maprow{grid-template-columns:1fr}
     .stamp{display:none}
   }
+  /* inside an embed (itch.io player), the iframe blocks body scrolling;
+     switch to an internal scroll container instead */
+  body.embedded{height:100vh;overflow:hidden;padding:0}
+  body.embedded #scrollwrap{
+    height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:70px 14px 60px;
+  }
+
   @page{ margin:11mm 12mm }
   @media print{
     body{background:#fff;padding:0;font-size:12.5px}
+    body.embedded{height:auto;overflow:visible}
+    body.embedded #scrollwrap{height:auto;overflow:visible;padding:0}
     .toolbar,.toast,.pager,.dice,.faqwrap,.journal{display:none !important}
     .sheet{border:none;box-shadow:none;max-width:none;padding:2px 0}
     .sheet, .gm, .gm-block, .person svg{
@@ -357,6 +367,7 @@
 <button class="pager prev" id="pg-prev" aria-label="Previous village" title="Previous village (←)">‹<small>prev sheet</small></button>
 <button class="pager next" id="pg-next" aria-label="Next village" title="Next village (→)">›<small>next sheet</small></button>
 
+<div id="scrollwrap">
 <main class="sheet" id="sheet" aria-live="polite"></main>
 
 <aside class="faqwrap" aria-label="About Smallfolk">
@@ -366,6 +377,7 @@
   <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
   <div><h3>Who keeps this — and who wrote it?</h3>No AI at the table: villages are dealt from hand-curated tables by a seeded algorithm — nothing is generated while you play. The tables and code were built in an open human–AI collaboration, and we say so plainly. No accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
 </aside>
+</div>
 
 <div class="guide" id="guide" role="dialog" aria-label="How Smallfolk works">
   <div class="gpanel">
@@ -1091,6 +1103,14 @@ function generate(seed){
 let V = null;
 let SHIRE = null;   /* base string when viewing a shire map */
 
+/* inside an embed (itch.io), the iframe blocks body scroll — scroll internally */
+try { if (window.self !== window.top) document.body.classList.add('embedded'); } catch (e){ document.body.classList.add('embedded'); }
+function scrollHome(){
+  const w = document.getElementById('scrollwrap');
+  if (w) w.scrollTop = 0;
+  window.scrollTo({ top: 0 });
+}
+
 /* ================= the shire ================= */
 function seedParts(seed){
   const m = seed.match(/^(.*?)(\d+)$/);
@@ -1530,7 +1550,7 @@ function boot(){
     V = null; SHIRE = base;
     document.body.classList.add('shire-mode');
     renderShire(base);
-    window.scrollTo({ top: 0 });
+    scrollHome();
     return;
   }
   SHIRE = null;
@@ -1538,7 +1558,7 @@ function boot(){
   V = generate(seed);
   render();
   jLoad();
-  window.scrollTo({ top: 0 });
+  scrollHome();
 }
 window.addEventListener('hashchange', boot);
 boot();
