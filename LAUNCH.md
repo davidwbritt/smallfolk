@@ -22,7 +22,7 @@ the community is loudly tired of both.
 
 - [x] GitHub repo + Pages live — **davidwbritt.github.io/smallfolk**
 - [x] Create Ko-fi account — **ko-fi.com/clevermonkey**, wired into index.html
-- [x] itch.io account created — page upload pending (recipe: itch-assets/itch-page-copy.md)
+- [x] itch.io page LIVE — **clevermonkey.itch.io/smallfolk** (AI disclosure: YES)
 - [ ] Sanity-pass 5–10 villages; note any text that reads wrong (Claude fixes)
 
 ## Phase B — Pre-launch polish (Claude)
