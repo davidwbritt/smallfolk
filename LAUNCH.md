@@ -59,6 +59,14 @@ the same sub. Three conclusions:
 3. **#daily is the ritual hook** — a "village of the day" link that sidebars,
    Discord bots, and daily-thread posters can cite forever.
 
+## Phase B.5 — Soft seeding (current phase, no hurry)
+
+Dave is seeding Smallfolk privately to active gamers he knows, gathering
+feature feedback before any public post. The launch drafts below keep — they
+get BETTER with this phase, since "built by playtester request" is stronger
+copy. Feedback loop: friends → Dave → Claude ships → friends see their ideas
+land (which is also what converts friends into evangelists).
+
 ## Phase C — Launch week (Dave posts, Claude drafts everything)
 
 Post schedule — one community per day, never cross-post same-day, always
