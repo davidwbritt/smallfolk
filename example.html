@@ -20,7 +20,10 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#dcd6c6;color:var(--ink);font-family:var(--body);line-height:1.65;padding:40px 14px 60px}
-  body.embedded{height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 14px 60px}
+  /* in an embed, body overflow propagates to the (blocked) viewport unless
+     the root is constrained — so the class goes on <html> */
+  html.embedded{height:100%;overflow:hidden}
+  html.embedded body{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
   ::selection{background:var(--ink);color:var(--paper)}
   .page{max-width:720px;margin:0 auto;background:var(--paper);border:1px solid #b9b19c;
     box-shadow:0 24px 50px -24px rgba(30,25,15,.55);padding:48px 52px 40px}
@@ -143,6 +146,6 @@
     <span>no AI at the table · no accounts · <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></span>
   </div>
 </main>
-<script>try{if(window.self!==window.top)document.body.classList.add('embedded');}catch(e){document.body.classList.add('embedded');}</script>
+<script>try{if(window.self!==window.top)document.documentElement.classList.add('embedded');}catch(e){document.documentElement.classList.add('embedded');}</script>
 </body>
 </html>
