@@ -191,6 +191,13 @@
   .pager.prev{left:10px}
   .pager.next{right:10px}
   body.shire-mode .pager{display:none}
+  .backlink{
+    display:inline-block;margin-bottom:16px;cursor:pointer;
+    font-family:var(--util);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    background:none;border:1px solid var(--ink);border-radius:2px;
+    color:var(--ink);padding:7px 14px;
+  }
+  .backlink:hover{background:var(--ink);color:var(--paper)}
   .pager small{
     position:absolute;top:100%;margin-top:6px;
     font-family:var(--util);font-size:8px;letter-spacing:.16em;text-transform:uppercase;
@@ -1120,6 +1127,7 @@ function generate(seed){
 /* ================= rendering ================= */
 let V = null;
 let SHIRE = null;   /* base string when viewing a shire map */
+let LASTV = null;   /* the village you were in before the shire map */
 
 /* inside an embed (itch.io), the iframe blocks body scroll — scroll internally */
 try { if (window.self !== window.top) document.body.classList.add('embedded'); } catch (e){ document.body.classList.add('embedded'); }
@@ -1175,6 +1183,11 @@ function renderShire(base){
   const S = buildShire(base);
   const mk = i => '<a href="#' + S.members[i].seed + '">' + esc(S.members[i].name) + '</a>';
   let h = '';
+  /* the way back: to the village you came from, or in at the first gate */
+  const backSeed = LASTV || S.members[0].seed;
+  const backName = LASTV ? generate(LASTV).name : S.members[0].name;
+  h += '<button class="backlink" id="shire-back" title="Esc also works">← ' +
+    (LASTV ? 'Back to ' + esc(backName) : 'Enter the hundred at ' + esc(backName)) + '</button>';
   h += '<header class="masthead">' +
     '<div class="over">Regional survey · ' + S.members.length + ' villages · one road</div>' +
     '<h1>' + esc(cap(S.name)) + '</h1>' +
@@ -1201,6 +1214,7 @@ function renderShire(base){
     '<span>no AI at the table · no accounts · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
   document.getElementById('sheet').innerHTML = h;
   document.title = cap(S.name) + ' — Smallfolk';
+  document.getElementById('shire-back').addEventListener('click', () => { location.hash = backSeed; });
   return S;
 }
 
@@ -1436,7 +1450,11 @@ function guideClose(){ guide.classList.remove('open'); }
 document.getElementById('btn-help').addEventListener('click', guideOpen);
 document.getElementById('guide-x').addEventListener('click', guideClose);
 guide.addEventListener('click', e => { if (e.target === guide) guideClose(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') guideClose(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (guide.classList.contains('open')){ guideClose(); return; }
+  if (SHIRE){ location.hash = LASTV || (SHIRE + '1'); }
+});
 document.getElementById('guide-reset').addEventListener('click', () => {
   if (!confirm('Forget every journal and setting Smallfolk has saved in this browser? The villages themselves are safe — they live in their addresses.')) return;
   try {
@@ -1629,6 +1647,7 @@ function boot(){
   SHIRE = null;
   document.body.classList.remove('shire-mode');
   V = generate(seed);
+  LASTV = seed;
   render();
   jLoad();
   scrollHome();
