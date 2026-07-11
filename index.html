@@ -82,6 +82,16 @@
     font-family:var(--util);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
   }
   .vitals b{color:var(--ink);font-weight:400}
+  .vitals button.seededit{
+    background:none;border:none;padding:0;cursor:pointer;
+    font:inherit;color:var(--ink);text-decoration:underline dotted;text-underline-offset:3px;
+  }
+  .vitals button.seededit:hover{color:var(--red)}
+  .vitals input.seedinput{
+    font-family:var(--util);font-size:10.5px;letter-spacing:.14em;text-transform:lowercase;
+    border:1px solid var(--ink);border-radius:2px;background:#fbf9f3;color:var(--ink);
+    padding:2px 6px;width:170px;
+  }
 
   section{margin-top:30px}
   h2.sec{
@@ -356,6 +366,7 @@
 <nav class="toolbar" aria-label="Controls">
   <span class="brand">Smallfolk<small>a whole village on one page</small></span>
   <button id="btn-new">New village</button>
+  <button id="btn-share" title="Copy a link that opens this exact village anywhere">Share village</button>
   <button id="btn-view" aria-pressed="false">Player view</button>
   <button id="btn-md">Copy markdown</button>
   <button id="btn-journal" aria-pressed="false">Journal</button>
@@ -372,7 +383,7 @@
 
 <aside class="faqwrap" aria-label="About Smallfolk">
   <div><h3>What is this?</h3>One click gives a GM a complete village: people, secrets, rumors, prices, and one good Trouble — cross-referenced, on one printable page. System-neutral. New to RPGs? <a href="example.html">Read a full worked session</a>.</div>
-  <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey. Link <a href="#daily">#daily</a> for the village of the day — same for everyone, new at midnight UTC.</div>
+  <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey. Link <a href="#daily">#daily</a> for the village of the day — same for everyone, new at midnight UTC. Playing on itch, where the address bar isn’t yours? <b>Share village</b> copies the real link, and clicking the seed lets you type a new one.</div>
   <div><h3>Playing solo?</h3>Toggle <b>Player view</b> so the mystery stays hidden from yourself, open the <b>Journal</b>, press <b>⚑ Begin</b>, and let the oracle in the dice tray answer your questions. Your journal saves per village and exports as Markdown.</div>
   <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
   <div><h3>Who keeps this — and who wrote it?</h3>No AI at the table: villages are dealt from hand-curated tables by a seeded algorithm — nothing is generated while you play. The tables and code were built in an open human–AI collaboration, and we say so plainly. No accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
@@ -417,6 +428,7 @@
     <h3>Every control, in one line each</h3>
     <table>
       <tr><td>New village</td><td>Invent a fresh village with a new address.</td></tr>
+      <tr><td>Share village</td><td>Copy a link that opens this exact village anywhere — the way to share from itch, where the address bar isn’t yours. Click the seed in the header to type one in.</td></tr>
       <tr><td>‹ › arrows / ← →</td><td>Flip to the neighbouring “sheets of the survey” — village 42, 43, 44…</td></tr>
       <tr><td>Player view</td><td>Hide / reveal all the red ink. Safe for screens and for solo play.</td></tr>
       <tr><td>Copy markdown</td><td>The whole village as tidy text for your notes app.</td></tr>
@@ -1207,7 +1219,7 @@ function render(){
     '<div class="over">Parish survey · one page · ' + esc(V.region) + '</div>' +
     '<h1>' + esc(V.name) + '</h1>' +
     '<div class="sub">' + esc(V.note) + ' &nbsp;·&nbsp; Talk of the village: “' + esc(V.trouble.symptom) + '”</div>' +
-    '<div class="vitals"><span>Souls <b>' + V.pop + '</b></span><span>Of note <b>' + V.npcs.length + '</b></span><span>Rumors abroad <b>' + V.rumors.length + '</b></span><span>Seed <b>' + esc(V.seed) + '</b></span></div>' +
+    '<div class="vitals"><span>Souls <b>' + V.pop + '</b></span><span>Of note <b>' + V.npcs.length + '</b></span><span>Rumors abroad <b>' + V.rumors.length + '</b></span><span id="seed-slot">Seed <button class="seededit" id="seed-edit" title="Type a seed — any words work">' + esc(V.seed) + ' ✎</button></span></div>' +
     '</header>';
 
   /* map + legend */
@@ -1263,6 +1275,24 @@ function render(){
 
   document.getElementById('sheet').innerHTML = h;
   document.title = esc(V.name) + ' — Smallfolk';
+
+  /* click the seed to type a new one (the only way in, on itch) */
+  document.getElementById('seed-edit').addEventListener('click', function(){
+    const slot = document.getElementById('seed-slot');
+    slot.innerHTML = 'Seed <input class="seedinput" id="seed-input" value="' + esc(V.seed) + '" spellcheck="false">';
+    const inp = document.getElementById('seed-input');
+    inp.focus(); inp.select();
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter'){
+        const v = inp.value.trim();
+        if (v && v !== V.seed) location.hash = v;
+        else render();
+      }
+      if (e.key === 'Escape') render();
+      e.stopPropagation();
+    });
+    inp.addEventListener('blur', () => { if (document.getElementById('seed-input')) render(); });
+  });
 }
 
 /* ================= markdown export ================= */
@@ -1308,6 +1338,33 @@ function randomSeed(){
     VILLAGE_B[Math.floor(r() * VILLAGE_B.length)] + '-' + Math.floor(r() * 900 + 100);
 }
 document.getElementById('btn-new').addEventListener('click', () => { location.hash = randomSeed(); });
+
+/* Share: the canonical address works everywhere, including out of itch's iframe */
+const CANONICAL = 'https://davidwbritt.github.io/smallfolk/';
+function copyText(text, okMsg){
+  const done = () => toast(okMsg);
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, () => legacyCopy(text) ? done() : toast('Copy blocked — address: ' + text));
+  } else {
+    legacyCopy(text) ? done() : toast('Copy blocked — address: ' + text);
+  }
+}
+function legacyCopy(text){
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch (e){ return false; }
+}
+document.getElementById('btn-share').addEventListener('click', () => {
+  const frag = SHIRE ? 'shire:' + SHIRE.replace(/-+$/, '') : (V ? V.seed : '');
+  copyText(CANONICAL + '#' + frag, 'Link copied — same village for everyone, forever');
+});
 document.getElementById('btn-view').addEventListener('click', function(){
   const on = document.body.classList.toggle('player-view');
   this.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -1346,6 +1403,8 @@ document.getElementById('pg-prev').addEventListener('click', () => stepSeed(-1))
 document.getElementById('pg-next').addEventListener('click', () => stepSeed(1));
 document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
   if (e.key === 'ArrowLeft') stepSeed(-1);
   if (e.key === 'ArrowRight') stepSeed(1);
 });
