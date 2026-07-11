@@ -19,8 +19,9 @@ real grudges, hooks lead somewhere. Deterministic per seed — the URL *is*
 the village. `index.html#wether-hollow-42` is the same village for everyone,
 forever. System-neutral; no game's trademarks anywhere.
 
-**Positioning:** no AI, no accounts, no ads, works offline, one file.
-The tip link is the business model.
+**Positioning:** no AI at the table (deterministic hand-curated tables; the
+tables/code were built in a disclosed human–AI collaboration), no accounts,
+no ads, works offline, one file. The tip link is the business model.
 
 ## Deploy to GitHub Pages (5 minutes)
 

@@ -45,8 +45,11 @@ beginners **(no AI)**" — the community writes *no AI* into its request
 titles — while a builder's "AI Oracle" tool post sat at **zero points** in
 the same sub. Three conclusions:
 
-1. **"No AI" is a demand keyword, not a footnote.** It goes in post TITLES:
-   "…no AI, no accounts, just tables."
+1. **"No AI at the table" is the honest form of the demand keyword.** The
+   runtime uses no AI; the tables/code were AI-collaborated and we disclose
+   it (itch AI-disclosure: YES). Post titles use the honest phrase and the
+   body owns the provenance plainly — with this audience, getting caught
+   fudging would be fatal; candor is the only durable position.
 2. **Solo roleplaying is the hot underserved lane.** Smallfolk already
    generates what solo players keep asking for (mysteries with suspects and
    clue-rumors); with the dice tray's oracle (likely/even/unlikely + spark

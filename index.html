@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Smallfolk — a whole village on one page</title>
-<meta name="description" content="One-click fantasy villages for tabletop GMs: a dozen NPCs with interlocking secrets, a tavern, a rumor table, and one good Trouble — on a single printable page. No AI, no accounts, no ads.">
+<meta name="description" content="One-click fantasy villages for tabletop GMs: a dozen NPCs with interlocking secrets, a tavern, a rumor table, and one good Trouble — on a single printable page. No AI at the table, no accounts, no ads.">
 <meta property="og:title" content="Smallfolk — a whole village on one page">
 <meta property="og:description" content="Ten villagers, their secrets, their tavern, their Trouble. Seeded, shareable, printable. Free forever.">
 <meta property="og:type" content="website">
@@ -364,7 +364,7 @@
   <div><h3>How do seeds work?</h3>The URL is the village. Share it and everyone sees the same place, forever. The ‹ › arrows turn to the neighbouring sheets of the survey. Link <a href="#daily">#daily</a> for the village of the day — same for everyone, new at midnight UTC.</div>
   <div><h3>Playing solo?</h3>Toggle <b>Player view</b> so the mystery stays hidden from yourself, open the <b>Journal</b>, press <b>⚑ Begin</b>, and let the oracle in the dice tray answer your questions. Your journal saves per village and exports as Markdown.</div>
   <div><h3>Can I publish what it makes?</h3>Yes — generated villages are CC0. Put them in your campaign, your zine, your paid adventure. No credit needed (though the innkeeper remembers kindness).</div>
-  <div><h3>Who keeps this?</h3>No AI, no accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
+  <div><h3>Who keeps this — and who wrote it?</h3>No AI at the table: villages are dealt from hand-curated tables by a seeded algorithm — nothing is generated while you play. The tables and code were built in an open human–AI collaboration, and we say so plainly. No accounts, no ads, no tracking: one HTML file, <a href="https://github.com/davidwbritt/smallfolk">open source</a>. If it saved your prep night, <a href="https://ko-fi.com/clevermonkey">tip the innkeeper ♥</a></div>
 </aside>
 
 <div class="guide" id="guide" role="dialog" aria-label="How Smallfolk works">
@@ -417,7 +417,10 @@
     </table>
 
     <h3>Fine print, minus the fine</h3>
-    <p>No AI, no accounts, no ads, no tracking — one open-source file that works offline.
+    <p><b>No AI at the table:</b> nothing is generated while you play — every village is dealt
+    from hand-curated tables by a seeded algorithm, offline. The tables and code themselves were
+    built in an open human–AI collaboration, disclosed here and everywhere we publish.
+    No accounts, no ads, no tracking — one open-source file.
     Villages you generate are <b>CC0</b>: use them in anything, including things you sell.</p>
     <p>Everything Smallfolk remembers (your journals, this notice) lives only in this
     browser. <button id="guide-reset" class="greset">Want a complete do-over? Forget it all.</button>
@@ -1157,7 +1160,7 @@ function renderShire(base){
     '<p style="margin-top:8px"><span class="gm">✎ </span>' + mk(S.feud[0]) + ' and ' + mk(S.feud[1]) + ' have not shared a church-ale in a generation, over ' + esc(S.feudReason) + '. Meanwhile a wedding is being arranged between ' + mk(S.wedding[0]) + ' and ' + mk(S.wedding[1]) + ' — both sides call it love, and also it settles a debt.</p>' +
     '</div></section>';
   h += '<footer class="colophon"><span>' + esc(cap(S.name)) + ' · shires are seeded too — this one is “shire:' + esc(base.replace(/-+$/, '')) + '”</span>' +
-    '<span>no AI · no accounts · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
+    '<span>no AI at the table · no accounts · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
   document.getElementById('sheet').innerHTML = h;
   document.title = cap(S.name) + ' — Smallfolk';
   return S;
@@ -1236,7 +1239,7 @@ function render(){
     '<p>' + esc(V.trouble.gm) + '</p></div></section>';
 
   h += '<footer class="colophon"><span>Smallfolk · seed “' + esc(V.seed) + '” · same seed, same village, forever</span>' +
-    '<span>no AI · no accounts · no ads · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
+    '<span>no AI at the table · no accounts · no ads · <a href="' + SUPPORT_URL + '" target="_blank" rel="noopener">tip the innkeeper ♥</a></span></footer>';
 
   document.getElementById('sheet').innerHTML = h;
   document.title = esc(V.name) + ' — Smallfolk';

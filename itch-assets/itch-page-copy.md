@@ -6,7 +6,7 @@
 |---|---|
 | Title | Smallfolk |
 | Project URL | smallfolk |
-| Short description | A whole fantasy village on one page — NPCs with interlocking secrets, a rumor table, and one good Trouble. No AI, no accounts, works offline. |
+| Short description | A whole fantasy village on one page: NPCs with interlocking secrets, rumors, and one good Trouble. No AI at the table. |
 | Classification | **Tools** |
 | Kind of project | **HTML** (played in the browser) |
 | Release status | Released |
@@ -18,6 +18,7 @@
 | Genre | (leave blank — it's a tool) |
 | Tags | dungeons-and-dragons, tabletop, generator, osr, gm-tools, npc, worldbuilding, procedural-generation |
 | Community | Comments enabled |
+| **AI disclosure** | **YES** — "contains the output of generative AI." The generator runs no AI, but its tables and code were written in a human–AI collaboration, and we disclose that everywhere. Honesty is load-bearing with this audience. |
 
 ## Description (paste into the big text box)
 
@@ -47,8 +48,11 @@ notice on the moot hall door is about the actual Trouble.
 **The URL is the village.** Same seed, same village, forever — share
 `#wether-hollow-42` and your whole table sees the same Harrowden you did.
 
-System-neutral. **No AI, no accounts, no ads, no subscription.** One HTML
-file that works offline and belongs to you. Villages you generate are yours
+System-neutral. **No AI at the table** — nothing is generated while you play;
+every village is dealt from hand-curated tables by a seeded algorithm. (Those
+tables and the code were built in an open human–AI collaboration — the AI
+disclosure on this page is checked, on purpose.) **No accounts, no ads, no
+subscription.** One HTML file that works offline and belongs to you. Villages you generate are yours
 (CC0) — publish them in anything, including commercial adventures.
 
 If Smallfolk saved you a prep night, tip the innkeeper. ♥
